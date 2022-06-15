@@ -34,6 +34,7 @@ func (g *Game) Update() error {
 	next, ok := g.current.Next()
 	if ok {
 		g.current = next
+		g.current.Reset()
 	}
 	return g.current.Update()
 }
