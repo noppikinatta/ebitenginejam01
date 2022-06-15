@@ -24,5 +24,17 @@ type Scene interface {
 }
 
 func First() Scene {
-	return nil // TODO: implement
+	t := titleScene{}
+	p := prologueScene{}
+	g := gamePlayScene{}
+	r := resultScene{}
+
+	t.next = &p
+	p.next = &g
+	g.next = &r
+	r.next = &p
+
+	t.Reset()
+
+	return &t
 }

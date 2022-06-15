@@ -17,6 +17,7 @@ package scene
 import "github.com/hajimehoshi/ebiten/v2"
 
 type gamePlayScene struct {
+	next Scene
 }
 
 func (s *gamePlayScene) Update() error {

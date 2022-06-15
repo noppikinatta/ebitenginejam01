@@ -16,7 +16,9 @@ package scene
 
 import "github.com/hajimehoshi/ebiten/v2"
 
-type resultScene struct{}
+type resultScene struct {
+	next Scene
+}
 
 func (s *resultScene) Update() error {
 	return nil // TODO: implement

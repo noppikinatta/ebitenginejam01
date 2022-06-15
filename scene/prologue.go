@@ -17,6 +17,7 @@ package scene
 import "github.com/hajimehoshi/ebiten/v2"
 
 type prologueScene struct {
+	next Scene
 }
 
 func (s *prologueScene) Update() error {
