@@ -12,26 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package scene
+package assets
 
-import "github.com/hajimehoshi/ebiten/v2"
+// Title
 
-type titleScene struct{
-	next Scene
-}
+// - bg
+// - logo
+// - robot
 
-func (s *titleScene) Update() error {
-	return nil // TODO: implement
-}
+// TODO: Study about go:embed
 
-func (s *titleScene) Draw(screen *ebiten.Image) {
+// Prologue
 
-}
+// - doctor
+// - gogengo
+// - illshootpartsenus
+// - illshootpartsjajp
+// - okdoctorenus
+// - okdoctorjajp
 
-func (s *titleScene) Next() (Scene, bool) {
-	return nil, false // TODO: implement
-}
+// Gameplay
 
-func (s *titleScene) Reset() {
+// - robot
+// - bg
 
-}
+// Result
+
+// - backfire
+// - enemy
+// - flame
+// - explosion
+// - bakuhatsu
+// - gekiha
+// - clicktoplayagain

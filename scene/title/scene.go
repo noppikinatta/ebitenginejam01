@@ -12,33 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package scene
+package title
 
-import (
-	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/noppikinatta/ebitenginejam01/scene/gameplay"
-	"github.com/noppikinatta/ebitenginejam01/scene/prologue"
-	"github.com/noppikinatta/ebitenginejam01/scene/result"
-	"github.com/noppikinatta/ebitenginejam01/scene/title"
-)
+import "github.com/hajimehoshi/ebiten/v2"
 
-type Scene interface {
-	Update() error
-	Draw(screen *ebiten.Image)
-	End() bool
-	Reset()
+type Scene struct {
+	canClick bool
 }
 
-func AllScenes() *Container {
-	t := &title.Scene{}
-	p := &prologue.Scene{}
-	g := &gameplay.Scene{}
-	r := &result.Scene{}
-
-	c := NewContainer([]Scene{t, p, g, r})
-
-	// TODO: return err
-	_ = c.AddTransition(r, p)
-
-	return c
+func (s *Scene) Update() error {
+	return nil // TODO: implement
 }
+
+func (s *Scene) Draw(screen *ebiten.Image) {
+
+}
+
+func (s *Scene) End() bool {
+	return false // TODO: implement
+}
+
+func (s *Scene) Reset() {
+
+}
+
+// 1. Title Scene Animation
+// 2. Can click After N frames
+// 3. Fadeout Screen
+// 4. Next can return next scene after faded out

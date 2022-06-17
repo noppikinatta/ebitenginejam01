@@ -20,27 +20,22 @@ import (
 )
 
 type Game struct {
-	current scene.Scene
+	scenes *scene.Container
 }
 
-func NewGame(first scene.Scene) *Game {
+func NewGame(scenes *scene.Container) *Game {
 	g := Game{
-		current: first,
+		scenes: scenes,
 	}
 	return &g
 }
 
 func (g *Game) Update() error {
-	next, ok := g.current.Next()
-	if ok {
-		g.current = next
-		g.current.Reset()
-	}
-	return g.current.Update()
+	return g.scenes.Current().Update()
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	g.current.Draw(screen)
+	g.scenes.Current().Draw(screen)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {

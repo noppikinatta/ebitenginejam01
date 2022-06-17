@@ -12,26 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package scene
+package assets
 
-import "github.com/hajimehoshi/ebiten/v2"
+// BGM
 
-type gamePlayScene struct {
-	next Scene
-}
+// - main
+// - result
 
-func (s *gamePlayScene) Update() error {
-	return nil // TODO: implement
-}
+// SE
 
-func (s *gamePlayScene) Draw(screen *ebiten.Image) {
+// Title
+// - start
 
-}
+// Prologue
+// - msg
 
-func (s *gamePlayScene) Next() (Scene, bool) {
-	return nil, false // TODO: implement
-}
+// Gameplay
+// - power
+// - combine
 
-func (s *gamePlayScene) Reset() {
-
-}
+// Result
+// - randing
+// - explode
+// - shoot
+// - fire

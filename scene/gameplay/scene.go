@@ -12,26 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package scene
+package gameplay
 
 import "github.com/hajimehoshi/ebiten/v2"
 
-type prologueScene struct {
-	next Scene
+type Scene struct {
+	canClick bool
 }
 
-func (s *prologueScene) Update() error {
+func (s *Scene) Update() error {
 	return nil // TODO: implement
 }
 
-func (s *prologueScene) Draw(screen *ebiten.Image) {
+func (s *Scene) Draw(screen *ebiten.Image) {
 
 }
 
-func (s *prologueScene) Next() (Scene, bool) {
-	return nil, false // TODO: implement
+func (s *Scene) End() bool {
+	return false // TODO: implement
 }
 
-func (s *prologueScene) Reset() {
+func (s *Scene) Reset() {
 
 }
+
+// 1. Title Scene Animation
+// 2. Can click After N frames
+// 3. Fadeout Screen
+// 4. Next can return next scene after faded out
