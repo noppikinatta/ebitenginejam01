@@ -14,29 +14,73 @@
 
 package title
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/noppikinatta/ebitenginejam01/animation"
+)
 
 type Scene struct {
-	canClick bool
+	state   state
+	fadein  *animation.Fadein
+	fadeout *animation.Fadeout
+	image   *image
+}
+
+func NewScene() *Scene {
+	s := Scene{
+		fadein:  animation.NewFadein(15),
+		fadeout: animation.NewFadeout(15),
+		image:   &image{},
+	}
+	s.Reset()
+	return &s
 }
 
 func (s *Scene) Update() error {
-	return nil // TODO: implement
+	s.updateState()
+
+	switch s.state {
+	case stateFadein:
+		s.fadein.Update()
+	case stateFadeout:
+		s.fadeout.Update()
+	}
+
+	s.image.Update()
+
+	return nil
+}
+
+func (s *Scene) updateState() {
+	switch s.state {
+	case stateFadein:
+		if s.fadein.End() {
+			s.state = stateWaitClick
+		}
+	case stateWaitClick:
+		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+			s.state = stateFadeout
+		}
+	}
 }
 
 func (s *Scene) Draw(screen *ebiten.Image) {
-
+	s.image.Draw(screen)
+	if s.state == stateFadein {
+		s.fadein.Draw(screen)
+	}
+	if s.state == stateFadeout {
+		s.fadeout.Draw(screen)
+	}
 }
 
 func (s *Scene) End() bool {
-	return false // TODO: implement
+	return s.fadeout.End()
 }
 
 func (s *Scene) Reset() {
-
+	s.state = stateFadein
+	s.fadein.Reset()
+	s.fadeout.Reset()
+	s.image.Reset()
 }
-
-// 1. Title Scene Animation
-// 2. Can click After N frames
-// 3. Fadeout Screen
-// 4. Next can return next scene after faded out
