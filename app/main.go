@@ -26,7 +26,7 @@ func main() {
 	ebiten.SetWindowSize(640, 640)
 	ebiten.SetWindowTitle("Ebiten Game Jam")
 
-	s := scene.First()
+	s := scene.AllScenes()
 	g := ebitenginejam01.NewGame(s)
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
