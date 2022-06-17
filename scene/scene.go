@@ -30,7 +30,7 @@ type Scene interface {
 }
 
 func AllScenes() *Container {
-	t := &title.Scene{}
+	t := title.NewScene()
 	p := &prologue.Scene{}
 	g := &gameplay.Scene{}
 	r := &result.Scene{}
