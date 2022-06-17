@@ -77,6 +77,9 @@ func (f *fade) Update() {
 }
 
 func (f *fade) Draw(target *ebiten.Image, alpha float64) {
+	if alpha == 0 {
+		return
+	}
 	c := f.cache(target.Size())
 	target.DrawImage(c, f.option(alpha))
 }
