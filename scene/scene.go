@@ -31,7 +31,7 @@ type Scene interface {
 
 func AllScenes() *Container {
 	t := title.NewScene()
-	p := &prologue.Scene{}
+	p := &prologue.Scene{} // TODO: add constructors
 	g := &gameplay.Scene{}
 	r := &result.Scene{}
 
