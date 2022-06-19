@@ -17,6 +17,7 @@ package title
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/noppikinatta/ebitenginejam01/animation"
+	"github.com/noppikinatta/ebitenginejam01/input"
 )
 
 type Scene struct {
@@ -58,7 +59,7 @@ func (s *Scene) updateState() {
 			s.state = stateWaitClick
 		}
 	case stateWaitClick:
-		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+		if input.LeftMousedownOrTouched() {
 			s.state = stateFadeout
 		}
 	}
