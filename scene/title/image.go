@@ -16,6 +16,7 @@ func (img *image) Update() {
 		return
 	}
 	// TODO: titile image animation
+	// FIXME: drawing in update is not good way
 	img.img.Fill(color.RGBA{G: 200, B: 200, A: 255})
 	ebitenutil.DebugPrint(img.img, "title")
 }
