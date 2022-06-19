@@ -3,8 +3,8 @@ package gameplay
 type state int
 
 const (
-	stateFadein state = iota
+	stateFadeIn state = iota
 	stateCombine
 	stateCombineComplete
-	stateFadeout
+	stateFadeOut
 )

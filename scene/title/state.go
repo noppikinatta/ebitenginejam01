@@ -3,7 +3,7 @@ package title
 type state int
 
 const (
-	stateFadein state = iota
+	stateFadeIn state = iota
 	stateWaitClick
-	stateFadeout
+	stateFadeOut
 )

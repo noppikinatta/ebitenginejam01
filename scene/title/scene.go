@@ -22,15 +22,15 @@ import (
 
 type Scene struct {
 	state   state
-	fadein  *animation.Fadein
-	fadeout *animation.Fadeout
+	fadeIn  *animation.FadeIn
+	fadeOut *animation.FadeOut
 	image   *image
 }
 
 func NewScene() *Scene {
 	s := Scene{
-		fadein:  animation.NewFadein(15),
-		fadeout: animation.NewFadeout(15),
+		fadeIn:  animation.NewFadeIn(15),
+		fadeOut: animation.NewFadeOut(15),
 		image:   &image{},
 	}
 	s.Reset()
@@ -41,10 +41,10 @@ func (s *Scene) Update() error {
 	s.updateState()
 
 	switch s.state {
-	case stateFadein:
-		s.fadein.Update()
-	case stateFadeout:
-		s.fadeout.Update()
+	case stateFadeIn:
+		s.fadeIn.Update()
+	case stateFadeOut:
+		s.fadeOut.Update()
 	}
 
 	s.image.Update()
@@ -54,34 +54,34 @@ func (s *Scene) Update() error {
 
 func (s *Scene) updateState() {
 	switch s.state {
-	case stateFadein:
-		if s.fadein.End() {
+	case stateFadeIn:
+		if s.fadeIn.End() {
 			s.state = stateWaitClick
 		}
 	case stateWaitClick:
 		if input.LeftMousedownOrTouched() {
-			s.state = stateFadeout
+			s.state = stateFadeOut
 		}
 	}
 }
 
 func (s *Scene) Draw(screen *ebiten.Image) {
 	s.image.Draw(screen)
-	if s.state == stateFadein {
-		s.fadein.Draw(screen)
+	if s.state == stateFadeIn {
+		s.fadeIn.Draw(screen)
 	}
-	if s.state == stateFadeout {
-		s.fadeout.Draw(screen)
+	if s.state == stateFadeOut {
+		s.fadeOut.Draw(screen)
 	}
 }
 
 func (s *Scene) End() bool {
-	return s.fadeout.End()
+	return s.fadeOut.End()
 }
 
 func (s *Scene) Reset() {
-	s.state = stateFadein
-	s.fadein.Reset()
-	s.fadeout.Reset()
+	s.state = stateFadeIn
+	s.fadeIn.Reset()
+	s.fadeOut.Reset()
 	s.image.Reset()
 }

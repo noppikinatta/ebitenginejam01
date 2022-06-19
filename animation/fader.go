@@ -8,12 +8,12 @@ import (
 
 var faderGlobalCacheImage *ebiten.Image
 
-type Fadein struct {
+type FadeIn struct {
 	fade
 }
 
-func NewFadein(frames int) *Fadein {
-	f := Fadein{
+func NewFadeIn(frames int) *FadeIn {
+	f := FadeIn{
 		fade: fade{
 			frames: frames,
 		},
@@ -22,11 +22,11 @@ func NewFadein(frames int) *Fadein {
 	return &f
 }
 
-func (f *Fadein) Draw(target *ebiten.Image) {
+func (f *FadeIn) Draw(target *ebiten.Image) {
 	f.fade.Draw(target, f.alpha())
 }
 
-func (f *Fadein) alpha() float64 {
+func (f *FadeIn) alpha() float64 {
 	a := 1.0 - float64(f.current)/float64(f.frames)
 	if a < 0 {
 		a = 0
@@ -34,12 +34,12 @@ func (f *Fadein) alpha() float64 {
 	return a
 }
 
-type Fadeout struct {
+type FadeOut struct {
 	fade
 }
 
-func NewFadeout(frames int) *Fadeout {
-	f := Fadeout{
+func NewFadeOut(frames int) *FadeOut {
+	f := FadeOut{
 		fade: fade{
 			frames: frames,
 		},
@@ -48,11 +48,11 @@ func NewFadeout(frames int) *Fadeout {
 	return &f
 }
 
-func (f *Fadeout) Draw(target *ebiten.Image) {
+func (f *FadeOut) Draw(target *ebiten.Image) {
 	f.fade.Draw(target, f.alpha())
 }
 
-func (f *Fadeout) alpha() float64 {
+func (f *FadeOut) alpha() float64 {
 	a := float64(f.current) / float64(f.frames)
 	if a > 1 {
 		a = 1

@@ -3,8 +3,8 @@ package result
 type state int
 
 const (
-	stateFadein state = iota
+	stateFadeIn state = iota
 	stateResultAnimation
 	stateWaitClick
-	stateFadeout
+	stateFadeOut
 )

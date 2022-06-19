@@ -38,5 +38,5 @@ func (s *Scene) Reset() {
 
 // 1. Title Scene Animation
 // 2. Can click After N frames
-// 3. Fadeout Screen
+// 3. FadeOut Screen
 // 4. Next can return next scene after faded out

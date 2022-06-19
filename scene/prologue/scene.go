@@ -22,8 +22,8 @@ import (
 
 type Scene struct {
 	state   state
-	fadein  *animation.Fadein
-	fadeout *animation.Fadeout
+	fadeIn  *animation.FadeIn
+	fadeOut *animation.FadeOut
 	msg1    *messageScreen
 	msg2    *messageScreen
 }
@@ -34,10 +34,10 @@ func (s *Scene) Update() error {
 	s.updateState()
 
 	switch s.state {
-	case stateMsg1Fadein, stateMsg2Fadein:
-		s.fadein.Update()
-	case stateMsg1Fadeout, stateMsg2Fadeout:
-		s.fadeout.Update()
+	case stateMsg1FadeIn, stateMsg2FadeIn:
+		s.fadeIn.Update()
+	case stateMsg1FadeOut, stateMsg2FadeOut:
+		s.fadeOut.Update()
 	}
 
 	return nil
@@ -45,27 +45,27 @@ func (s *Scene) Update() error {
 
 func (s *Scene) updateState() {
 	switch s.state {
-	case stateMsg1Fadein:
-		if s.fadein.End() {
-			s.fadein.Reset()
+	case stateMsg1FadeIn:
+		if s.fadeIn.End() {
+			s.fadeIn.Reset()
 			s.state = stateMsg1WaitClick
 		}
 	case stateMsg1WaitClick:
 		if input.LeftMousedownOrTouched() {
-			s.state = stateMsg1Fadeout
+			s.state = stateMsg1FadeOut
 		}
-	case stateMsg1Fadeout:
-		if s.fadeout.End() {
-			s.fadeout.Reset()
-			s.state = stateMsg2Fadein
+	case stateMsg1FadeOut:
+		if s.fadeOut.End() {
+			s.fadeOut.Reset()
+			s.state = stateMsg2FadeIn
 		}
-	case stateMsg2Fadein:
-		if s.fadein.End() {
+	case stateMsg2FadeIn:
+		if s.fadeIn.End() {
 			s.state = stateMsg2WaitClick
 		}
 	case stateMsg2WaitClick:
 		if input.LeftMousedownOrTouched() {
-			s.state = stateMsg2Fadeout
+			s.state = stateMsg2FadeOut
 		}
 	}
 }
@@ -73,32 +73,32 @@ func (s *Scene) updateState() {
 func (s *Scene) Draw(screen *ebiten.Image) {
 	s.currentScreen().Draw(screen)
 	switch s.state {
-	case stateMsg1Fadein, stateMsg2Fadein:
-		s.fadein.Draw(screen)
-	case stateMsg1Fadeout, stateMsg2Fadeout:
-		s.fadeout.Draw(screen)
+	case stateMsg1FadeIn, stateMsg2FadeIn:
+		s.fadeIn.Draw(screen)
+	case stateMsg1FadeOut, stateMsg2FadeOut:
+		s.fadeOut.Draw(screen)
 	}
 }
 
 func (s *Scene) currentScreen() *messageScreen {
 	switch s.state {
-	case stateMsg1Fadein, stateMsg1WaitClick, stateMsg1Fadeout:
+	case stateMsg1FadeIn, stateMsg1WaitClick, stateMsg1FadeOut:
 		return s.msg1
 	}
 	return s.msg2
 }
 
 func (s *Scene) End() bool {
-	if s.state != stateMsg2Fadeout {
+	if s.state != stateMsg2FadeOut {
 		return false
 	}
-	return s.fadeout.End()
+	return s.fadeOut.End()
 }
 
 func (s *Scene) Reset() {
-	s.state = stateMsg1Fadein
-	s.fadein.Reset()
-	s.fadeout.Reset()
+	s.state = stateMsg1FadeIn
+	s.fadeIn.Reset()
+	s.fadeOut.Reset()
 	s.msg1.Reset()
 	s.msg2.Reset()
 }
