@@ -14,34 +14,63 @@
 
 package assets
 
-// Title
+import (
+	"embed"
+	"fmt"
+	"image"
+	_ "image/png"
 
-// - bg
-// - logo
-// - robot
+	"github.com/hajimehoshi/ebiten/v2"
+)
 
-// TODO: Study about go:embed
+//go:embed img/*.png
+var imgDir embed.FS
 
-// Prologue
+var imgCache map[Img]*ebiten.Image
 
-// - doctor
-// - gogengo
-// - illshootpartsenus
-// - illshootpartsjajp
-// - okdoctorenus
-// - okdoctorjajp
+func fromCache(i Img) (*ebiten.Image, bool) {
+	// concurrent unsafe but can implement easily
 
-// Gameplay
+	if imgCache == nil {
+		imgCache = make(map[Img]*ebiten.Image)
+	}
 
-// - robot
-// - bg
+	img, ok := imgCache[i]
+	return img, ok
+}
 
-// Result
+type Img string
 
-// - backfire
-// - enemy
-// - flame
-// - explosion
-// - bakuhatsu
-// - gekiha
-// - clicktoplayagain
+func (i Img) MustImage() *ebiten.Image {
+	img, ok := fromCache(i)
+	if ok {
+		return img
+	}
+
+	// MustImage can panic, because Img type values are defined by const and fixed
+	img, err := i.createImage()
+	if err != nil {
+		panic(err)
+	}
+	imgCache[i] = img
+
+	return img
+}
+
+func (i Img) createImage() (*ebiten.Image, error) {
+	imgFile, err := imgDir.Open(i.path())
+	if err != nil {
+		return nil, err
+	}
+
+	baseImg, _, err := image.Decode(imgFile)
+	if err != nil {
+		return nil, err
+	}
+
+	return ebiten.NewImageFromImage(baseImg), nil
+}
+
+func (i Img) path() string {
+	return fmt.Sprintf("img/%s", i)
+}
