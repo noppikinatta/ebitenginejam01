@@ -17,7 +17,6 @@ package title
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/noppikinatta/ebitenginejam01/animation"
-	"github.com/noppikinatta/ebitenginejam01/assets"
 	"github.com/noppikinatta/ebitenginejam01/input"
 )
 
@@ -32,7 +31,7 @@ func NewScene() *Scene {
 	s := Scene{
 		fadeIn:  animation.NewFadeIn(15),
 		fadeOut: animation.NewFadeOut(15),
-		image:   &image{img: assets.ImgTitleBg.MustImage()},
+		image:   newImage(),
 	}
 	s.Reset()
 	return &s
