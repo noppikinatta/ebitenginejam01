@@ -4,7 +4,7 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/noppikinatta/ebitenginejam01/assets"
+	"github.com/noppikinatta/ebitenginejam01/asset"
 )
 
 type messageScreen struct {
@@ -18,13 +18,13 @@ type messageScreen struct {
 
 func newMessageScreen() *messageScreen {
 	s := messageScreen{
-		chara: assets.ImgPrologueDoctor.MustImage(),
+		chara: asset.ImgPrologueDoctor.MustImage(),
 		msg: []*ebiten.Image{
-			assets.ImgPrologueMsg1.MustImage(),
-			assets.ImgPrologueMsg2.MustImage(),
+			asset.ImgPrologueMsg1.MustImage(),
+			asset.ImgPrologueMsg2.MustImage(),
 		},
 		optMsgShadow: &ebiten.DrawImageOptions{},
-		img:          ebiten.NewImage(assets.ImgResultBg.MustImage().Size()),
+		img:          ebiten.NewImage(asset.ImgResultBg.MustImage().Size()),
 	}
 	s.optMsgShadow.GeoM.Translate(2, 2)
 	s.optMsgShadow.ColorM.Scale(0, 0, 0, 1)

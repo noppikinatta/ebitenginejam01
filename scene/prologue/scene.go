@@ -17,7 +17,7 @@ package prologue
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/noppikinatta/ebitenginejam01/animation"
-	"github.com/noppikinatta/ebitenginejam01/assets"
+	"github.com/noppikinatta/ebitenginejam01/asset"
 	"github.com/noppikinatta/ebitenginejam01/input"
 )
 
@@ -108,7 +108,7 @@ func (s *Scene) Draw(screen *ebiten.Image) {
 
 	if s.state.Launching() {
 		//TODO: impl launching scene
-		screen.DrawImage(assets.ImgPrologueBg.MustImage(), nil)
+		screen.DrawImage(asset.ImgPrologueBg.MustImage(), nil)
 	}
 
 	if s.state.FadingIn() {

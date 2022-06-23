@@ -2,7 +2,7 @@ package prologue
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/noppikinatta/ebitenginejam01/assets"
+	"github.com/noppikinatta/ebitenginejam01/asset"
 )
 
 type enemyAppears struct {
@@ -17,8 +17,8 @@ type enemyAppears struct {
 
 func newEnemyAppears() *enemyAppears {
 	ea := enemyAppears{
-		bg:           assets.ImgResultBg.MustImage(),
-		enemy:        assets.ImgResultEnemy.MustImage(),
+		bg:           asset.ImgResultBg.MustImage(),
+		enemy:        asset.ImgResultEnemy.MustImage(),
 		optEnemy:     &ebiten.DrawImageOptions{},
 		jumpPower:    5,
 		gravityPower: 1,

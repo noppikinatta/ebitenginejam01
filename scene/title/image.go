@@ -2,7 +2,7 @@ package title
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/noppikinatta/ebitenginejam01/assets"
+	"github.com/noppikinatta/ebitenginejam01/asset"
 )
 
 type image struct {
@@ -20,9 +20,9 @@ type image struct {
 
 func newImage() *image {
 	img := image{
-		bg:                assets.ImgTitleBg.MustImage(),
-		logo:              assets.ImgTitleLogo.MustImage(),
-		robot:             assets.ImgTitleRobot.MustImage(),
+		bg:                asset.ImgTitleBg.MustImage(),
+		logo:              asset.ImgTitleLogo.MustImage(),
+		robot:             asset.ImgTitleRobot.MustImage(),
 		optBG:             &ebiten.DrawImageOptions{},
 		optLogo:           &ebiten.DrawImageOptions{},
 		optRobot:          &ebiten.DrawImageOptions{},
