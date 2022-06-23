@@ -12,23 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package assets
+package asset
 
 // BGM
 
-// - main
+// - main intro
+// - main loop
 // - result
 
 // SE
 
-// Title
-// - start
-
-// Prologue
-// - msg
-
 // Gameplay
-// - power
 // - combine
 
 // Result
