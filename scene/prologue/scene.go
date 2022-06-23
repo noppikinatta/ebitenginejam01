@@ -17,27 +17,48 @@ package prologue
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/noppikinatta/ebitenginejam01/animation"
+	"github.com/noppikinatta/ebitenginejam01/assets"
 	"github.com/noppikinatta/ebitenginejam01/input"
 )
 
 type Scene struct {
-	state   state
-	fadeIn  *animation.FadeIn
-	fadeOut *animation.FadeOut
-	msg1    *messageScreen
-	msg2    *messageScreen
+	state         state
+	fadeIn        *animation.FadeIn
+	fadeOut       *animation.FadeOut
+	ea            *enemyAppears
+	msg           *messageScreen
+	msgWaitFrames int
+	msgWaitCount  int
+	// TODO: add launching screen
 }
 
-// TODO: constructor
+func NewScene() *Scene {
+	s := Scene{
+		fadeIn:        animation.NewFadeIn(15),
+		fadeOut:       animation.NewFadeOut(15),
+		ea:            newEnemyAppears(),
+		msg:           newMessageScreen(),
+		msgWaitFrames: 45,
+	}
+	s.Reset()
+	return &s
+}
 
 func (s *Scene) Update() error {
 	s.updateState()
 
-	switch s.state {
-	case stateMsg1FadeIn, stateMsg2FadeIn:
+	if s.state.FadingIn() {
 		s.fadeIn.Update()
-	case stateMsg1FadeOut, stateMsg2FadeOut:
+	}
+	if s.state.FadingOut() {
 		s.fadeOut.Update()
+	}
+
+	if s.state.Msg() {
+		s.ea.Update()
+		if s.msgWaitCount < s.msgWaitFrames {
+			s.msgWaitCount++
+		}
 	}
 
 	return nil
@@ -45,60 +66,69 @@ func (s *Scene) Update() error {
 
 func (s *Scene) updateState() {
 	switch s.state {
-	case stateMsg1FadeIn:
+	case stateMsgFadeIn:
 		if s.fadeIn.End() {
 			s.fadeIn.Reset()
-			s.state = stateMsg1WaitClick
+			s.state = stateMsgWaitClick
 		}
-	case stateMsg1WaitClick:
-		if input.LeftMousedownOrTouched() {
-			s.state = stateMsg1FadeOut
+	case stateMsgWaitClick:
+		if s.msgShown() && input.LeftMousedownOrTouched() {
+			remaining := s.msg.Next()
+			if !remaining {
+				s.state = stateMsgFadeOut
+			}
 		}
-	case stateMsg1FadeOut:
+	case stateMsgFadeOut:
 		if s.fadeOut.End() {
 			s.fadeOut.Reset()
-			s.state = stateMsg2FadeIn
+			s.state = stateLaunchFadeIn
 		}
-	case stateMsg2FadeIn:
+	case stateLaunchFadeIn:
 		if s.fadeIn.End() {
-			s.state = stateMsg2WaitClick
+			s.state = stateLaunchWaitClick
 		}
-	case stateMsg2WaitClick:
+	case stateLaunchWaitClick:
 		if input.LeftMousedownOrTouched() {
-			s.state = stateMsg2FadeOut
+			s.state = stateLaunchFadeOut
 		}
 	}
 }
 
+func (s *Scene) msgShown() bool {
+	return s.msgWaitCount >= s.msgWaitFrames
+}
+
 func (s *Scene) Draw(screen *ebiten.Image) {
-	s.currentScreen().Draw(screen)
-	switch s.state {
-	case stateMsg1FadeIn, stateMsg2FadeIn:
+	if s.state.Msg() {
+		s.ea.Draw(screen)
+		if s.msgShown() {
+			s.msg.Draw(screen)
+		}
+	}
+
+	if s.state.Launching() {
+		//TODO: impl launching scene
+		screen.DrawImage(assets.ImgPrologueBg.MustImage(), nil)
+	}
+
+	if s.state.FadingIn() {
 		s.fadeIn.Draw(screen)
-	case stateMsg1FadeOut, stateMsg2FadeOut:
+	}
+	if s.state.FadingOut() {
 		s.fadeOut.Draw(screen)
 	}
 }
 
-func (s *Scene) currentScreen() *messageScreen {
-	switch s.state {
-	case stateMsg1FadeIn, stateMsg1WaitClick, stateMsg1FadeOut:
-		return s.msg1
-	}
-	return s.msg2
-}
-
 func (s *Scene) End() bool {
-	if s.state != stateMsg2FadeOut {
+	if s.state != stateLaunchFadeOut {
 		return false
 	}
 	return s.fadeOut.End()
 }
 
 func (s *Scene) Reset() {
-	s.state = stateMsg1FadeIn
+	s.state = stateMsgFadeIn
 	s.fadeIn.Reset()
 	s.fadeOut.Reset()
-	s.msg1.Reset()
-	s.msg2.Reset()
+	s.msg.Reset()
 }
