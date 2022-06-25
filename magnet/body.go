@@ -1,4 +1,4 @@
-package game
+package magnet
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
@@ -16,9 +16,51 @@ type Body struct {
 	height         float64
 }
 
+func NewBody(width, height, armPoleYOffset, legPoleXOffset float64) *Body {
+	b := Body{
+		width:          width,
+		height:         height,
+		armPoleYOffset: armPoleYOffset,
+		legPoleXOffset: legPoleXOffset,
+	}
+	b.updatePoleLocs()
+	return &b
+}
+
+func (b *Body) LeftArmPole() Pole {
+	return b.leftArmPole
+}
+
+func (b *Body) RightArmPole() Pole {
+	return b.rightArmPole
+}
+
+func (b *Body) LeftLegPole() Pole {
+	return b.leftLegPole
+}
+
+func (b *Body) RightLegPole() Pole {
+	return b.rightLegPole
+}
+
+func (b *Body) Poles() []Pole {
+	return []Pole{
+		b.leftArmPole,
+		b.rightArmPole,
+		b.leftLegPole,
+		b.rightLegPole,
+	}
+}
+
 func (b *Body) UpdateLoc(x, y float64) {
 	b.loc.X = x
 	b.loc.Y = y
+	b.updatePoleLocs()
+}
+
+func (b *Body) updatePoleLocs() {
+	x := b.loc.X
+	y := b.loc.Y
 
 	left := x - b.width/2
 	top := y - b.height/2

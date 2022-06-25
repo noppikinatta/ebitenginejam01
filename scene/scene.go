@@ -32,7 +32,7 @@ type Scene interface {
 func AllScenes() *Container {
 	t := title.NewScene()
 	p := prologue.NewScene() // TODO: add constructors
-	g := &gameplay.Scene{}
+	g := gameplay.NewScene()
 	r := &result.Scene{}
 
 	c := NewContainer([]Scene{t, p, g, r})

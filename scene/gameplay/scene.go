@@ -14,18 +14,67 @@
 
 package gameplay
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/noppikinatta/ebitenginejam01/animation"
+	"github.com/noppikinatta/ebitenginejam01/asset"
+	"github.com/noppikinatta/ebitenginejam01/combine"
+)
 
 type Scene struct {
-	canClick bool
+	state   state
+	fadeIn  *animation.FadeIn
+	fadeOut *animation.FadeOut
+	bg      *ebiten.Image
+	body    *body
+	result  *combine.CombinedResult
+}
+
+func NewScene() *Scene {
+	s := Scene{
+		fadeIn:  animation.NewFadeIn(15),
+		fadeOut: animation.NewFadeOut(15),
+		bg:      asset.ImgGameplayBg.MustImage(),
+		body:    newBody(),
+	}
+	s.Reset()
+	return &s
 }
 
 func (s *Scene) Update() error {
+	s.updateState()
+
+	if s.state == stateFadeIn {
+		s.fadeIn.Update()
+	}
+	if s.state == stateFadeOut {
+		s.fadeOut.Update()
+	}
+
+	s.body.Update()
 	return nil // TODO: implement
 }
 
-func (s *Scene) Draw(screen *ebiten.Image) {
+func (s *Scene) updateState() {
+	switch s.state {
+	case stateFadeIn:
+		if s.fadeIn.End() {
+			s.fadeIn.Reset()
+			s.state = stateCombine
+		}
+	}
+}
 
+func (s *Scene) Draw(screen *ebiten.Image) {
+	screen.DrawImage(s.bg, nil)
+	s.body.Draw(screen)
+
+	if s.state == stateFadeIn {
+		s.fadeIn.Draw(screen)
+	}
+	if s.state == stateFadeOut {
+		s.fadeOut.Draw(screen)
+	}
 }
 
 func (s *Scene) End() bool {
@@ -33,10 +82,8 @@ func (s *Scene) End() bool {
 }
 
 func (s *Scene) Reset() {
+	s.state = stateFadeIn
+	s.fadeIn.Reset()
+	s.fadeOut.Reset()
 
 }
-
-// 1. Title Scene Animation
-// 2. Can click After N frames
-// 3. FadeOut Screen
-// 4. Next can return next scene after faded out

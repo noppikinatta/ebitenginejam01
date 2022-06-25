@@ -1,4 +1,4 @@
-package game
+package magnet
 
 type Location struct {
 	X float64
