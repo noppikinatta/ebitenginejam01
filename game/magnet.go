@@ -42,7 +42,7 @@ func (p Pole) Affected(other Pole) Power {
 
 	if d < 1 {
 		if p.Stick(other) {
-			return Power{}
+			return Power{p.X - other.X, p.Y - other.Y}
 		}
 		d = 1
 	}
