@@ -7,7 +7,7 @@ import (
 )
 
 type Part interface {
-	Update([]Pole)
+	Update(poles []Pole)
 	GeoM() ebiten.GeoM
 }
 
@@ -83,4 +83,28 @@ type MonopolePart struct {
 	width    float64
 	height   float64
 	velocity Velocity
+}
+
+func (p *MonopolePart) Update(poles []Pole) {
+	for _, pole := range poles {
+		p.updateVelocity(pole)
+	}
+	p.loc = p.loc.Move(p.velocity)
+	p.updatePoleLoc()
+}
+
+func (p *MonopolePart) updateVelocity(pole Pole) {
+	a := p.pole.Affected(pole)
+	p.velocity = p.velocity.Accelerate(a)
+}
+
+func (p *MonopolePart) updatePoleLoc() {
+	p.pole.X = p.loc.X
+	p.pole.Y = p.loc.Y
+}
+
+func (p *MonopolePart) GeoM() ebiten.GeoM {
+	gm := ebiten.GeoM{}
+	gm.Translate(p.loc.X, p.loc.Y)
+	return gm
 }
