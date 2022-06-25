@@ -58,6 +58,9 @@ func (p Pole) Affected(other Pole) Power {
 		py *= -1
 	}
 
+	px /= (d * d)
+	py /= (d * d)
+
 	return Power{px, py}
 }
 
