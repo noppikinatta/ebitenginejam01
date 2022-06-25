@@ -1,6 +1,7 @@
 package magnet
 
 import (
+	"image/color"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -17,6 +18,16 @@ type BarMagnet struct {
 	tipV     Velocity
 }
 
+func NewBarMagnet(width, height float64, root, tip PoleType) *BarMagnet {
+	m := BarMagnet{
+		rootPole: Pole{Type: root},
+		tipPole:  Pole{Type: tip},
+		width:    width,
+		height:   height,
+	}
+	return &m
+}
+
 func (m *BarMagnet) Update(poles []Pole) {
 	for _, pole := range poles {
 		m.updateVelocity(pole)
@@ -27,6 +38,11 @@ func (m *BarMagnet) Update(poles []Pole) {
 }
 
 func (m *BarMagnet) updateVelocity(pole Pole) {
+	decay := 0.99
+	m.rootV.X *= decay
+	m.rootV.Y *= decay
+	m.tipV.X *= decay
+	m.tipV.Y *= decay
 	ra := m.rootPole.Affected(pole)
 	ta := m.tipPole.Affected(pole)
 	m.rootV = m.rootV.Accelerate(ra)
@@ -76,8 +92,38 @@ func (m *BarMagnet) GeoM() ebiten.GeoM {
 	gm.Translate(-m.width/2, -m.height/2)
 	gm.Rotate(m.angle)
 	gm.Translate(m.width/2, m.height/2)
-	gm.Translate(m.loc.X, m.loc.Y)
+	gm.Translate(m.loc.X-m.width/2, m.loc.Y-m.height/2)
 	return gm
+}
+
+func (m *BarMagnet) RootVDebug() (x1, y1, x2, y2 float64, c color.Color) {
+	x1 = m.rootPole.X
+	y1 = m.rootPole.Y
+	x2 = x1 + m.rootV.X
+	y2 = y1 + m.rootV.Y
+	c = color.Black
+	if m.rootPole.Type == PoleTypeN {
+		c = color.RGBA{200, 0, 0, 255}
+	}
+	if m.rootPole.Type == PoleTypeS {
+		c = color.RGBA{0, 0, 200, 255}
+	}
+	return
+}
+
+func (m *BarMagnet) TipVDebug() (x1, y1, x2, y2 float64, c color.Color) {
+	x1 = m.tipPole.X
+	y1 = m.tipPole.Y
+	x2 = x1 + m.tipV.X
+	y2 = y1 + m.tipV.Y
+	c = color.Black
+	if m.tipPole.Type == PoleTypeN {
+		c = color.RGBA{200, 0, 0, 255}
+	}
+	if m.tipPole.Type == PoleTypeS {
+		c = color.RGBA{0, 0, 200, 255}
+	}
+	return
 }
 
 type MonopoleMagnet struct {
@@ -112,6 +158,6 @@ func (m *MonopoleMagnet) Stick(pole Pole) bool {
 
 func (m *MonopoleMagnet) GeoM() ebiten.GeoM {
 	gm := ebiten.GeoM{}
-	gm.Translate(m.loc.X, m.loc.Y)
+	gm.Translate(m.loc.X-m.width/2, m.loc.Y-m.height/2)
 	return gm
 }

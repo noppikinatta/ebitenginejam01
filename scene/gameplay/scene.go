@@ -27,6 +27,7 @@ type Scene struct {
 	fadeOut *animation.FadeOut
 	bg      *ebiten.Image
 	body    *body
+	leftarm *leftArm
 	result  *combine.CombinedResult
 }
 
@@ -36,6 +37,7 @@ func NewScene() *Scene {
 		fadeOut: animation.NewFadeOut(15),
 		bg:      asset.ImgGameplayBg.MustImage(),
 		body:    newBody(),
+		leftarm: newLeftArm(),
 	}
 	s.Reset()
 	return &s
@@ -52,6 +54,10 @@ func (s *Scene) Update() error {
 	}
 
 	s.body.Update()
+
+	poles := s.body.Poles()
+
+	s.leftarm.Update(poles)
 	return nil // TODO: implement
 }
 
@@ -68,6 +74,7 @@ func (s *Scene) updateState() {
 func (s *Scene) Draw(screen *ebiten.Image) {
 	screen.DrawImage(s.bg, nil)
 	s.body.Draw(screen)
+	s.leftarm.Draw(screen)
 
 	if s.state == stateFadeIn {
 		s.fadeIn.Draw(screen)

@@ -2,6 +2,7 @@ package gameplay
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/noppikinatta/ebitenginejam01/asset"
 	"github.com/noppikinatta/ebitenginejam01/input"
 	"github.com/noppikinatta/ebitenginejam01/magnet"
@@ -25,6 +26,10 @@ func newBody() *body {
 	}
 
 	return &b
+}
+
+func (b *body) Poles() []magnet.Pole {
+	return b.magnet.Poles()
 }
 
 func (b *body) Update() {
@@ -56,4 +61,38 @@ func (p *combinedPart) Draw(screen *ebiten.Image, bodyGM ebiten.GeoM) {
 	p.opt.GeoM = gm
 
 	screen.DrawImage(p.image, p.opt)
+}
+
+type leftArm struct {
+	image  *ebiten.Image
+	magnet *magnet.BarMagnet
+	opt    *ebiten.DrawImageOptions
+}
+
+func newLeftArm() *leftArm {
+	img := asset.ImgRobotPart(asset.RobotPartLeftArm)
+	w, h := img.Size()
+
+	la := leftArm{
+		image:  img,
+		magnet: magnet.NewBarMagnet(float64(w), float64(h), magnet.PoleTypeN, magnet.PoleTypeS),
+		opt:    &ebiten.DrawImageOptions{},
+	}
+
+	return &la
+}
+
+func (la *leftArm) Update(poles []magnet.Pole) {
+	la.magnet.Update(poles)
+}
+
+func (la *leftArm) Draw(screen *ebiten.Image) {
+	gm := la.magnet.GeoM()
+	la.opt.GeoM = gm
+	screen.DrawImage(la.image, la.opt)
+
+	x1, y1, x2, y2, c := la.magnet.RootVDebug()
+	ebitenutil.DrawLine(screen, x1, y1, x2, y2, c)
+	x1, y1, x2, y2, c = la.magnet.TipVDebug()
+	ebitenutil.DrawLine(screen, x1, y1, x2, y2, c)
 }

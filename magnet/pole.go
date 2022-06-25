@@ -2,9 +2,9 @@ package magnet
 
 import "math"
 
-const magnetPower float64 = 1
+const magnetPower float64 = 10
 
-const MagnetPowerRange float64 = 100
+const MagnetPowerRange float64 = 1000
 
 type PoleType int
 
@@ -47,19 +47,19 @@ func (p Pole) Affected(other Pole) Power {
 		d = 1
 	}
 
-	dx := p.X - other.X
-	dy := p.Y - other.Y
+	dx := other.X - p.X
+	dy := other.Y - p.Y
 
 	px := magnetPower * (dx / d)
 	py := magnetPower * (dy / d)
 
 	if p.Type == other.Type {
-		px *= -1
-		py *= -1
+		px *= -0.5
+		py *= -0.5
 	}
 
-	px /= (d * d)
-	py /= (d * d)
+	px /= d
+	py /= d
 
 	return Power{px, py}
 }

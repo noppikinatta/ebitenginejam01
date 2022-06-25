@@ -22,6 +22,10 @@ func NewBody(width, height, armPoleYOffset, legPoleXOffset float64) *Body {
 		height:         height,
 		armPoleYOffset: armPoleYOffset,
 		legPoleXOffset: legPoleXOffset,
+		leftArmPole:    Pole{Type: PoleTypeS},
+		rightArmPole:   Pole{Type: PoleTypeN},
+		leftLegPole:    Pole{Type: PoleTypeN},
+		rightLegPole:   Pole{Type: PoleTypeS},
 	}
 	b.updatePoleLocs()
 	return &b
