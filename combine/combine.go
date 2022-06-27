@@ -1,5 +1,7 @@
 package combine
 
+import "github.com/noppikinatta/ebitenginejam01/part"
+
 type CombinedType int
 
 const (
@@ -29,46 +31,80 @@ const (
 )
 
 type CombinedResult struct {
-	LeftArm  CombinedType
-	RightArm CombinedType
-	LeftLeg  CombinedType
-	RightLeg CombinedType
+	Drawer *Drawer
+	types  map[part.PartType]CombinedType
+}
+
+func NewCombinedResult(drawer *Drawer) *CombinedResult {
+	r := CombinedResult{
+		Drawer: drawer,
+		types:  make(map[part.PartType]CombinedType),
+	}
+	return &r
+}
+
+func (r *CombinedResult) Set(pt part.PartType, ct CombinedType) {
+	r.types[pt] = ct
+}
+
+func (r *CombinedResult) LeftArm() CombinedType {
+	return r.typeOrDefault(part.PartTypeLeftArm)
+}
+
+func (r *CombinedResult) RightArm() CombinedType {
+	return r.typeOrDefault(part.PartTypeRightArm)
+}
+
+func (r *CombinedResult) LeftLeg() CombinedType {
+	return r.typeOrDefault(part.PartTypeLeftLeg)
+}
+
+func (r *CombinedResult) RightLeg() CombinedType {
+	return r.typeOrDefault(part.PartTypeRightArm)
+}
+
+func (r *CombinedResult) typeOrDefault(t part.PartType) CombinedType {
+	ct, ok := r.types[t]
+	if !ok {
+		return CombinedTypeNone
+	}
+	return ct
 }
 
 func (r *CombinedResult) Complete() bool {
-	if r.LeftArm == CombinedTypeNone {
+	if r.LeftArm() == CombinedTypeNone {
 		return false
 	}
-	if r.RightArm == CombinedTypeNone {
+	if r.RightArm() == CombinedTypeNone {
 		return false
 	}
-	if r.LeftLeg == CombinedTypeNone {
+	if r.LeftLeg() == CombinedTypeNone {
 		return false
 	}
-	if r.RightLeg == CombinedTypeNone {
+	if r.RightLeg() == CombinedTypeNone {
 		return false
 	}
 	return true
 }
 
 func (r *CombinedResult) Randing() RandingType {
-	if r.LeftLeg != CombinedTypeCorrectLeg {
+	if r.LeftLeg() != CombinedTypeCorrectLeg {
 		return RandingTypeFailure
 	}
-	if r.RightLeg != CombinedTypeCorrectLeg {
+	if r.RightLeg() != CombinedTypeCorrectLeg {
 		return RandingTypeFailure
 	}
 	return RandingTypeSuccess
 }
 
 func (r *CombinedResult) Attack() AttackType {
-	if r.LeftArm == CombinedTypeCorrectArm {
+	if r.LeftArm() == CombinedTypeCorrectArm {
 		return AttackTypeSuccess
 	}
-	if r.LeftArm == CombinedTypeTNT {
+	if r.LeftArm() == CombinedTypeTNT {
 		return AttackTypeTNT
 	}
-	if r.RightArm == CombinedTypeTNT {
+	if r.RightArm() == CombinedTypeTNT {
 		return AttackTypeTNT
 	}
 
@@ -76,8 +112,5 @@ func (r *CombinedResult) Attack() AttackType {
 }
 
 func (r *CombinedResult) Reset() {
-	r.LeftArm = CombinedTypeNone
-	r.RightArm = CombinedTypeNone
-	r.LeftLeg = CombinedTypeNone
-	r.RightLeg = CombinedTypeNone
+	r.types = make(map[part.PartType]CombinedType)
 }

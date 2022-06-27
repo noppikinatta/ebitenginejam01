@@ -2,13 +2,11 @@ package magnet
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/noppikinatta/ebitenginejam01/part"
 )
 
 type Body struct {
-	leftArmPole    Pole
-	rightArmPole   Pole
-	leftLegPole    Pole
-	rightLegPole   Pole
+	parts          map[part.PartType]Pole
 	armPoleYOffset float64
 	legPoleXOffset float64
 	loc            Location
@@ -22,38 +20,23 @@ func NewBody(width, height, armPoleYOffset, legPoleXOffset float64) *Body {
 		height:         height,
 		armPoleYOffset: armPoleYOffset,
 		legPoleXOffset: legPoleXOffset,
-		leftArmPole:    Pole{Type: PoleTypeS},
-		rightArmPole:   Pole{Type: PoleTypeN},
-		leftLegPole:    Pole{Type: PoleTypeN},
-		rightLegPole:   Pole{Type: PoleTypeS},
+		parts: map[part.PartType]Pole{
+			part.PartTypeLeftArm:  {Type: PoleTypeS},
+			part.PartTypeRightArm: {Type: PoleTypeN},
+			part.PartTypeLeftLeg:  {Type: PoleTypeN},
+			part.PartTypeRightLeg: {Type: PoleTypeS},
+		},
 	}
 	b.updatePoleLocs()
 	return &b
 }
 
-func (b *Body) LeftArmPole() Pole {
-	return b.leftArmPole
+func (b *Body) Pole(pt part.PartType) Pole {
+	return b.parts[pt]
 }
 
-func (b *Body) RightArmPole() Pole {
-	return b.rightArmPole
-}
-
-func (b *Body) LeftLegPole() Pole {
-	return b.leftLegPole
-}
-
-func (b *Body) RightLegPole() Pole {
-	return b.rightLegPole
-}
-
-func (b *Body) Poles() []Pole {
-	return []Pole{
-		b.leftArmPole,
-		b.rightArmPole,
-		b.leftLegPole,
-		b.rightLegPole,
-	}
+func (b *Body) Poles() map[part.PartType]Pole {
+	return b.parts
 }
 
 func (b *Body) UpdateLoc(x, y float64) {
@@ -71,17 +54,21 @@ func (b *Body) updatePoleLocs() {
 	right := x + b.width/2
 	bottom := y + b.height/2
 
-	b.leftArmPole.X = left
-	b.leftArmPole.Y = top + b.armPoleYOffset
+	p := b.parts[part.PartTypeLeftArm]
+	p.X = left
+	p.Y = top + b.armPoleYOffset
 
-	b.rightArmPole.X = right
-	b.rightArmPole.Y = b.leftArmPole.Y
+	p = b.parts[part.PartTypeRightArm]
+	p.X = right
+	p.Y = top + b.armPoleYOffset
 
-	b.leftLegPole.X = left + b.legPoleXOffset
-	b.leftLegPole.Y = bottom
+	p = b.parts[part.PartTypeLeftLeg]
+	p.X = left + b.legPoleXOffset
+	p.Y = bottom
 
-	b.rightLegPole.X = right - b.legPoleXOffset
-	b.rightLegPole.Y = bottom
+	p = b.parts[part.PartTypeRightLeg]
+	p.X = right - b.legPoleXOffset
+	p.Y = bottom
 }
 
 func (b *Body) GeoM() ebiten.GeoM {

@@ -4,31 +4,30 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/noppikinatta/ebitenginejam01/asset"
+	"github.com/noppikinatta/ebitenginejam01/combine"
 	"github.com/noppikinatta/ebitenginejam01/input"
 	"github.com/noppikinatta/ebitenginejam01/magnet"
+	"github.com/noppikinatta/ebitenginejam01/part"
 )
 
 type body struct {
-	image  *ebiten.Image
+	Drawer *combine.Drawer
 	magnet *magnet.Body
-	opt    *ebiten.DrawImageOptions
-	parts  []*combinedPart
 }
 
-func newBody() *body {
+func newBody(drawer *combine.Drawer) *body {
 	img := asset.ImgRobotPart(asset.RobotPartBody)
 	w, h := img.Size()
 
 	b := body{
-		image:  img,
-		magnet: magnet.NewBody(float64(w), float64(h), 24, 16),
-		opt:    &ebiten.DrawImageOptions{},
+		Drawer: drawer,
+		magnet: magnet.NewBody(float64(w), float64(h), armPoleYOffset, legPoleXOffset),
 	}
 
 	return &b
 }
 
-func (b *body) Poles() []magnet.Pole {
+func (b *body) Poles() map[part.PartType]magnet.Pole {
 	return b.magnet.Poles()
 }
 
@@ -38,29 +37,47 @@ func (b *body) Update() {
 	b.magnet.UpdateLoc(float64(x), float64(y))
 }
 
+func (b *body) Combine(cc []combiner) []Result {
+	rr := make([]Result, 0)
+
+	for _, c := range cc {
+		for pt, p := range b.magnet.Poles() {
+			r, ok := c.Combine(p)
+			if ok {
+				r.PartType = pt
+				rr = append(rr, r)
+				goto next
+			}
+		}
+	next:
+	}
+
+	return rr
+}
+
 func (b *body) Draw(screen *ebiten.Image) {
 	gm := b.magnet.GeoM()
-	b.opt.GeoM = gm
-	screen.DrawImage(b.image, b.opt)
-
-	for _, p := range b.parts {
-		p.Draw(screen, gm)
-	}
+	b.Drawer.Draw(screen, gm)
 }
 
-type combinedPart struct {
-	image *ebiten.Image
-	gm    ebiten.GeoM
-	opt   *ebiten.DrawImageOptions
+type Result struct {
+	PartType     part.PartType
+	CombinedType combine.CombinedType
+	Image        *ebiten.Image
+	Inverse      bool
 }
 
-func (p *combinedPart) Draw(screen *ebiten.Image, bodyGM ebiten.GeoM) {
-	gm := p.gm
-	gm.Concat(bodyGM)
+type updater interface {
+	Update(poles []magnet.Pole)
+}
 
-	p.opt.GeoM = gm
+type combiner interface {
+	Combine(pole magnet.Pole) (result Result, ok bool)
+}
 
-	screen.DrawImage(p.image, p.opt)
+type updateCombiner interface {
+	updater
+	combiner
 }
 
 type leftArm struct {
@@ -95,4 +112,25 @@ func (la *leftArm) Draw(screen *ebiten.Image) {
 	ebitenutil.DrawLine(screen, x1, y1, x2, y2, c)
 	x1, y1, x2, y2, c = la.magnet.TipVDebug()
 	ebitenutil.DrawLine(screen, x1, y1, x2, y2, c)
+}
+
+func (la *leftArm) Combine(pole magnet.Pole) (result Result, ok bool) {
+	if la.magnet.StickRoot(pole) {
+		r := Result{
+			CombinedType: combine.CombinedTypeCorrectArm,
+			Image:        la.image,
+			Inverse:      false,
+		}
+		return r, true
+	}
+	if la.magnet.StickTip(pole) {
+		r := Result{
+			CombinedType: combine.CombinedTypeInverseArm,
+			Image:        la.image,
+			Inverse:      true,
+		}
+		return r, true
+	}
+
+	return Result{}, false
 }

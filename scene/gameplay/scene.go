@@ -21,23 +21,32 @@ import (
 	"github.com/noppikinatta/ebitenginejam01/combine"
 )
 
+const (
+	armPoleYOffset float64 = 24
+	legPoleXOffset float64 = 16
+)
+
 type Scene struct {
 	state   state
 	fadeIn  *animation.FadeIn
 	fadeOut *animation.FadeOut
 	bg      *ebiten.Image
 	body    *body
-	leftarm *leftArm
+	leftarm *leftArm // TODO: remove it
 	result  *combine.CombinedResult
 }
 
-func NewScene() *Scene {
+func NewScene(result *combine.CombinedResult) *Scene {
+	drawer := combine.NewDrawer(armPoleYOffset, legPoleXOffset)
+	result.Drawer = drawer
+
 	s := Scene{
 		fadeIn:  animation.NewFadeIn(15),
 		fadeOut: animation.NewFadeOut(15),
 		bg:      asset.ImgGameplayBg.MustImage(),
-		body:    newBody(),
+		body:    newBody(drawer),
 		leftarm: newLeftArm(),
+		result:  result,
 	}
 	s.Reset()
 	return &s
@@ -68,6 +77,15 @@ func (s *Scene) updateState() {
 			s.fadeIn.Reset()
 			s.state = stateCombine
 		}
+	}
+}
+
+func (s *Scene) updateCombine() {
+	rr := s.body.Combine([]combiner{s.leftarm})
+	for _, r := range rr {
+		s.result.Drawer.SetPart(r.PartType, r.Image, r.Inverse)
+		//TODO: no more emit megnetic force from combined poles
+		//TODO: remove combined part
 	}
 }
 
