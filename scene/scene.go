@@ -16,6 +16,7 @@ package scene
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/noppikinatta/ebitenginejam01/combine"
 	"github.com/noppikinatta/ebitenginejam01/scene/gameplay"
 	"github.com/noppikinatta/ebitenginejam01/scene/prologue"
 	"github.com/noppikinatta/ebitenginejam01/scene/result"
@@ -30,9 +31,11 @@ type Scene interface {
 }
 
 func AllScenes() *Container {
+	cr := combine.NewCombinedResult()
+
 	t := title.NewScene()
 	p := prologue.NewScene() // TODO: add constructors
-	g := gameplay.NewScene()
+	g := gameplay.NewScene(cr)
 	r := &result.Scene{}
 
 	c := NewContainer([]Scene{t, p, g, r})

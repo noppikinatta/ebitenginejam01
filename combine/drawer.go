@@ -20,9 +20,11 @@ func NewDrawer(armYOffset, legXOffset float64) *Drawer {
 	img := asset.ImgRobotPart(asset.RobotPartBody)
 
 	d := Drawer{
-		image: img,
-		opt:   &ebiten.DrawImageOptions{},
-		parts: make(map[part.PartType]*DrawerPart),
+		image:      img,
+		opt:        &ebiten.DrawImageOptions{},
+		parts:      make(map[part.PartType]*DrawerPart),
+		armYOffset: armYOffset,
+		legXOffset: legXOffset,
 	}
 	return &d
 }
@@ -38,6 +40,8 @@ func (d *Drawer) Draw(screen *ebiten.Image, gm ebiten.GeoM) {
 }
 
 func (d *Drawer) SetPart(p part.PartType, image *ebiten.Image, inverse bool) {
+	bodyW, bodyH := d.image.Size()
+
 	gm := ebiten.GeoM{}
 	w, h := image.Size()
 	if inverse {
@@ -48,20 +52,29 @@ func (d *Drawer) SetPart(p part.PartType, image *ebiten.Image, inverse bool) {
 
 	switch p {
 	case part.PartTypeLeftArm:
-		gm.Translate(0, -float64(h)/2)
+		// lotate PI
+		gm.Translate(-float64(w)/2, -float64(h)/2)
 		gm.Rotate(math.Pi)
-		gm.Translate(0, float64(h)/2)
-		gm.Translate(-float64(w), d.armYOffset)
+		gm.Translate(float64(w)/2, float64(h)/2)
+
+		gm.Translate(-float64(w), d.armYOffset-float64(h)/2)
 	case part.PartTypeRightArm:
-		gm.Translate(-float64(w), d.armYOffset)
+		gm.Translate(float64(bodyW), d.armYOffset-float64(h)/2)
 	case part.PartTypeLeftLeg:
-		gm.Translate(d.legXOffset, float64(h))
+		// lotate PI/2
+		gm.Translate(-float64(w)/2, -float64(h)/2)
 		gm.Rotate(math.Pi / 2)
-		gm.Translate(float64(h)/2, 0)
+		gm.Translate(float64(w)/2, float64(h)/2)
+
+		gm.Translate(-float64(bodyW)/2+d.legXOffset, float64(bodyH)+float64(w-h)/2)
 	case part.PartTypeRightLeg:
-		gm.Translate(float64(w)-d.legXOffset, float64(h))
+		// lotate PI/2
+		gm.Translate(-float64(w)/2, -float64(h)/2)
 		gm.Rotate(math.Pi / 2)
-		gm.Translate(float64(h)/2, 0)
+		gm.Translate(float64(w)/2, float64(h)/2)
+
+		// I don't know why but adding 2 to X offset is good
+		gm.Translate(+float64(bodyW)/2-d.legXOffset+2, float64(bodyH)+float64(w-h)/2)
 	}
 
 	d.parts[p] = NewDrawPart(image, gm)

@@ -18,13 +18,17 @@ type BarMagnet struct {
 	tipV     Velocity
 }
 
-func NewBarMagnet(width, height float64, root, tip PoleType) *BarMagnet {
+func NewBarMagnet(width, height float64, root, tip PoleType, loc Location, rootV, tipV Velocity) *BarMagnet {
 	m := BarMagnet{
 		rootPole: Pole{Type: root},
 		tipPole:  Pole{Type: tip},
 		width:    width,
 		height:   height,
+		loc:      loc,
+		rootV:    rootV,
+		tipV:     tipV,
 	}
+	m.updatePoleLocs()
 	return &m
 }
 
@@ -132,6 +136,18 @@ type MonopoleMagnet struct {
 	width    float64
 	height   float64
 	velocity Velocity
+}
+
+func NewMonopoleMagnet(width, height float64, pt PoleType, loc Location, v Velocity) *MonopoleMagnet {
+	m := MonopoleMagnet{
+		pole:     Pole{Type: pt},
+		loc:      loc,
+		width:    width,
+		height:   height,
+		velocity: v,
+	}
+	m.updatePoleLoc()
+	return &m
 }
 
 func (m *MonopoleMagnet) Update(poles []Pole) {

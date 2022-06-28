@@ -2,7 +2,7 @@ package magnet
 
 import "math"
 
-const magnetPower float64 = 10
+const magnetPower float64 = 5
 
 const MagnetPowerRange float64 = 1000
 
@@ -65,11 +65,11 @@ func (p Pole) Affected(other Pole) Power {
 }
 
 func (p Pole) Stick(other Pole) bool {
-	if p.Type.Stick(other.Type) {
+	if !p.Type.Stick(other.Type) {
 		return false
 	}
 
-	return p.distance(other) < 1
+	return p.distance(other) < 5
 }
 
 func (p Pole) distance(other Pole) float64 {

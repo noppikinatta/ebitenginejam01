@@ -19,6 +19,7 @@ import (
 	"github.com/noppikinatta/ebitenginejam01/animation"
 	"github.com/noppikinatta/ebitenginejam01/asset"
 	"github.com/noppikinatta/ebitenginejam01/combine"
+	"github.com/noppikinatta/ebitenginejam01/magnet"
 )
 
 const (
@@ -27,26 +28,30 @@ const (
 )
 
 type Scene struct {
-	state   state
-	fadeIn  *animation.FadeIn
-	fadeOut *animation.FadeOut
-	bg      *ebiten.Image
-	body    *body
-	leftarm *leftArm // TODO: remove it
-	result  *combine.CombinedResult
+	state    state
+	fadeIn   *animation.FadeIn
+	fadeOut  *animation.FadeOut
+	bg       *ebiten.Image
+	body     *body
+	launcher *launcher
+	result   *combine.CombinedResult
+	comp     *complete
 }
 
 func NewScene(result *combine.CombinedResult) *Scene {
+	bg := asset.ImgGameplayBg.MustImage()
+	bgW, bgH := bg.Size()
 	drawer := combine.NewDrawer(armPoleYOffset, legPoleXOffset)
 	result.Drawer = drawer
 
 	s := Scene{
-		fadeIn:  animation.NewFadeIn(15),
-		fadeOut: animation.NewFadeOut(15),
-		bg:      asset.ImgGameplayBg.MustImage(),
-		body:    newBody(drawer),
-		leftarm: newLeftArm(),
-		result:  result,
+		fadeIn:   animation.NewFadeIn(15),
+		fadeOut:  animation.NewFadeOut(15),
+		bg:       bg,
+		body:     newBody(drawer),
+		launcher: newLauncher(),
+		result:   result,
+		comp:     newComplete(drawer, float64(bgW), float64(bgH)),
 	}
 	s.Reset()
 	return &s
@@ -62,12 +67,19 @@ func (s *Scene) Update() error {
 		s.fadeOut.Update()
 	}
 
-	s.body.Update()
+	if s.state == stateCombine {
+		s.body.Update()
+		s.updateCombine()
+	}
 
-	poles := s.body.Poles()
+	if s.state == stateCombineComplete {
+		s.comp.Update()
+	}
 
-	s.leftarm.Update(poles)
-	return nil // TODO: implement
+	s.launcher.Update()
+	s.updateParts()
+
+	return nil
 }
 
 func (s *Scene) updateState() {
@@ -77,22 +89,71 @@ func (s *Scene) updateState() {
 			s.fadeIn.Reset()
 			s.state = stateCombine
 		}
+	case stateCombine:
+		if s.result.Complete() {
+			s.state = stateCombineComplete
+			s.comp.SetLoc(s.body.Loc())
+		}
+	case stateCombineComplete:
+		if s.comp.End() {
+			s.state = stateFadeOut
+		}
+	}
+}
+
+func (s *Scene) updateParts() {
+	poles := make([]magnet.Pole, 0, len(s.body.Poles()))
+	for k, v := range s.body.Poles() {
+		if s.result.Combined(k) {
+			continue
+		}
+		poles = append(poles, v)
+	}
+
+	for _, p := range s.launcher.Parts {
+		p.Update(poles)
 	}
 }
 
 func (s *Scene) updateCombine() {
-	rr := s.body.Combine([]combiner{s.leftarm})
-	for _, r := range rr {
-		s.result.Drawer.SetPart(r.PartType, r.Image, r.Inverse)
-		//TODO: no more emit megnetic force from combined poles
-		//TODO: remove combined part
+	combinedParts := make([]robotPart, 0, len(s.launcher.Parts))
+	for _, p := range s.launcher.Parts {
+		for k, v := range s.body.Poles() {
+			if s.result.Combined(k) {
+				continue
+			}
+
+			r, ok := p.Combine(v)
+			if !ok {
+				continue
+			}
+
+			combinedParts = append(combinedParts, p)
+			s.result.Set(k, r.CombinedType)
+			s.result.Drawer.SetPart(k, r.Image, r.Inverse)
+			break
+		}
+	}
+
+	for _, p := range combinedParts {
+		s.launcher.Remove(p)
 	}
 }
 
 func (s *Scene) Draw(screen *ebiten.Image) {
 	screen.DrawImage(s.bg, nil)
-	s.body.Draw(screen)
-	s.leftarm.Draw(screen)
+
+	if s.state == stateCombine {
+		s.body.Draw(screen)
+	}
+
+	for _, p := range s.launcher.Parts {
+		p.Draw(screen)
+	}
+
+	if s.state == stateCombineComplete {
+		s.comp.Draw(screen)
+	}
 
 	if s.state == stateFadeIn {
 		s.fadeIn.Draw(screen)
@@ -103,12 +164,14 @@ func (s *Scene) Draw(screen *ebiten.Image) {
 }
 
 func (s *Scene) End() bool {
-	return false // TODO: implement
+	return s.fadeOut.End()
 }
 
 func (s *Scene) Reset() {
 	s.state = stateFadeIn
 	s.fadeIn.Reset()
 	s.fadeOut.Reset()
-
+	s.result.Reset()
+	s.launcher.Reset()
+	s.comp.Reset()
 }

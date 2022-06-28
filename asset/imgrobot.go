@@ -30,7 +30,7 @@ func (p RobotPart) SubImageRect() image.Rectangle {
 	case RobotPartLeftArm:
 		return image.Rect(128, 0, 191, 15)
 	case RobotPartTNT:
-		return image.Rect(64, 16, 79, 31)
+		return image.Rect(64, 16, 127, 31)
 	case RobotPartEbitenN:
 		return image.Rect(64, 32, 127, 47)
 	case RobotPartEbitenS:

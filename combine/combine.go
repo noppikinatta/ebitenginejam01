@@ -35,10 +35,9 @@ type CombinedResult struct {
 	types  map[part.PartType]CombinedType
 }
 
-func NewCombinedResult(drawer *Drawer) *CombinedResult {
+func NewCombinedResult() *CombinedResult {
 	r := CombinedResult{
-		Drawer: drawer,
-		types:  make(map[part.PartType]CombinedType),
+		types: make(map[part.PartType]CombinedType),
 	}
 	return &r
 }
@@ -60,7 +59,7 @@ func (r *CombinedResult) LeftLeg() CombinedType {
 }
 
 func (r *CombinedResult) RightLeg() CombinedType {
-	return r.typeOrDefault(part.PartTypeRightArm)
+	return r.typeOrDefault(part.PartTypeRightLeg)
 }
 
 func (r *CombinedResult) typeOrDefault(t part.PartType) CombinedType {
@@ -69,6 +68,10 @@ func (r *CombinedResult) typeOrDefault(t part.PartType) CombinedType {
 		return CombinedTypeNone
 	}
 	return ct
+}
+
+func (r *CombinedResult) Combined(t part.PartType) bool {
+	return r.typeOrDefault(t) != CombinedTypeNone
 }
 
 func (r *CombinedResult) Complete() bool {

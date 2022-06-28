@@ -1,8 +1,10 @@
 package gameplay
 
 import (
+	"math/rand"
+	"time"
+
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/noppikinatta/ebitenginejam01/asset"
 	"github.com/noppikinatta/ebitenginejam01/combine"
 	"github.com/noppikinatta/ebitenginejam01/input"
@@ -37,34 +39,41 @@ func (b *body) Update() {
 	b.magnet.UpdateLoc(float64(x), float64(y))
 }
 
-func (b *body) Combine(cc []combiner) []Result {
-	rr := make([]Result, 0)
-
-	for _, c := range cc {
-		for pt, p := range b.magnet.Poles() {
-			r, ok := c.Combine(p)
-			if ok {
-				r.PartType = pt
-				rr = append(rr, r)
-				goto next
-			}
-		}
-	next:
-	}
-
-	return rr
-}
-
 func (b *body) Draw(screen *ebiten.Image) {
 	gm := b.magnet.GeoM()
 	b.Drawer.Draw(screen, gm)
 }
 
+func (b *body) Loc() (x, y float64) {
+	return b.magnet.Loc()
+}
+
 type Result struct {
-	PartType     part.PartType
 	CombinedType combine.CombinedType
 	Image        *ebiten.Image
 	Inverse      bool
+}
+
+var rndForParts *rand.Rand
+
+func init() {
+	rndForParts = rand.New(rand.NewSource(time.Now().UnixNano()))
+}
+
+func randLoc() magnet.Location {
+	x := 30 + rndForParts.Intn(260)
+	return magnet.Location{
+		X: float64(x),
+		Y: 400,
+	}
+}
+
+func randVelocity() magnet.Velocity {
+	vy := -2 * rndForParts.Float64()
+	return magnet.Velocity{
+		X: 0,
+		Y: float64(vy),
+	}
 }
 
 type updater interface {
@@ -75,59 +84,265 @@ type combiner interface {
 	Combine(pole magnet.Pole) (result Result, ok bool)
 }
 
-type updateCombiner interface {
-	updater
-	combiner
+type drawer interface {
+	Draw(screen *ebiten.Image)
 }
 
-type leftArm struct {
+type robotPart interface {
+	updater
+	combiner
+	drawer
+}
+
+type limb struct {
+	image  *ebiten.Image
+	magnet *magnet.BarMagnet
+	opt    *ebiten.DrawImageOptions
+	arm    bool
+}
+
+func newLeftArm() robotPart {
+	img := asset.ImgRobotPart(asset.RobotPartLeftArm)
+	w, h := img.Size()
+
+	l := limb{
+		image: img,
+		magnet: magnet.NewBarMagnet(
+			float64(w),
+			float64(h),
+			magnet.PoleTypeN,
+			magnet.PoleTypeS,
+			randLoc(),
+			randVelocity(),
+			randVelocity(),
+		),
+		opt: &ebiten.DrawImageOptions{},
+		arm: true,
+	}
+
+	return &l
+}
+
+func newRightArm() robotPart {
+	img := asset.ImgRobotPart(asset.RobotPartRightArm)
+	w, h := img.Size()
+
+	l := limb{
+		image: img,
+		magnet: magnet.NewBarMagnet(
+			float64(w),
+			float64(h),
+			magnet.PoleTypeS,
+			magnet.PoleTypeN,
+			randLoc(),
+			randVelocity(),
+			randVelocity(),
+		),
+		opt: &ebiten.DrawImageOptions{},
+		arm: true,
+	}
+
+	return &l
+}
+
+func newLeftLeg() robotPart {
+	img := asset.ImgRobotPart(asset.RobotPartLeftLeg)
+	w, h := img.Size()
+
+	l := limb{
+		image: img,
+		magnet: magnet.NewBarMagnet(
+			float64(w),
+			float64(h),
+			magnet.PoleTypeS,
+			magnet.PoleTypeN,
+			randLoc(),
+			randVelocity(),
+			randVelocity(),
+		),
+		opt: &ebiten.DrawImageOptions{},
+	}
+
+	return &l
+}
+
+func newRightLeg() robotPart {
+	img := asset.ImgRobotPart(asset.RobotPartRightLeg)
+	w, h := img.Size()
+
+	l := limb{
+		image: img,
+		magnet: magnet.NewBarMagnet(
+			float64(w),
+			float64(h),
+			magnet.PoleTypeN,
+			magnet.PoleTypeS,
+			randLoc(),
+			randVelocity(),
+			randVelocity(),
+		),
+		opt: &ebiten.DrawImageOptions{},
+	}
+
+	return &l
+}
+
+func (l *limb) Update(poles []magnet.Pole) {
+	l.magnet.Update(poles)
+}
+
+func (l *limb) Draw(screen *ebiten.Image) {
+	gm := l.magnet.GeoM()
+	l.opt.GeoM = gm
+	screen.DrawImage(l.image, l.opt)
+}
+
+func (l *limb) Combine(pole magnet.Pole) (result Result, ok bool) {
+	if l.magnet.StickRoot(pole) {
+		r := Result{
+			Image:   l.image,
+			Inverse: false,
+		}
+		if l.arm {
+			r.CombinedType = combine.CombinedTypeCorrectArm
+		} else {
+			r.CombinedType = combine.CombinedTypeCorrectLeg
+		}
+		return r, true
+	}
+	if l.magnet.StickTip(pole) {
+		r := Result{
+			Image:   l.image,
+			Inverse: true,
+		}
+		if l.arm {
+			r.CombinedType = combine.CombinedTypeInverseArm
+		} else {
+			r.CombinedType = combine.CombinedTypeInverseLeg
+		}
+		return r, true
+	}
+
+	return Result{}, false
+}
+
+type ebi struct {
+	image        *ebiten.Image
+	magnet       *magnet.BarMagnet
+	opt          *ebiten.DrawImageOptions
+	combinedType combine.CombinedType
+}
+
+func newEbitenN() robotPart {
+	img := asset.ImgRobotPart(asset.RobotPartEbitenN)
+	w, h := img.Size()
+
+	l := ebi{
+		image: img,
+		magnet: magnet.NewBarMagnet(
+			float64(w),
+			float64(h),
+			magnet.PoleTypeN,
+			magnet.PoleTypeNone,
+			randLoc(),
+			randVelocity(),
+			randVelocity(),
+		),
+		opt:          &ebiten.DrawImageOptions{},
+		combinedType: combine.CombinedTypeEbitenN,
+	}
+
+	return &l
+}
+
+func newEbitenS() robotPart {
+	img := asset.ImgRobotPart(asset.RobotPartEbitenS)
+	w, h := img.Size()
+
+	e := ebi{
+		image: img,
+		magnet: magnet.NewBarMagnet(
+			float64(w),
+			float64(h),
+			magnet.PoleTypeS,
+			magnet.PoleTypeNone,
+			randLoc(),
+			randVelocity(),
+			randVelocity(),
+		),
+		opt:          &ebiten.DrawImageOptions{},
+		combinedType: combine.CombinedTypeEbitenS,
+	}
+
+	return &e
+}
+
+func (e *ebi) Update(poles []magnet.Pole) {
+	e.magnet.Update(poles)
+}
+
+func (e *ebi) Draw(screen *ebiten.Image) {
+	gm := e.magnet.GeoM()
+	e.opt.GeoM = gm
+	screen.DrawImage(e.image, e.opt)
+}
+
+func (e *ebi) Combine(pole magnet.Pole) (result Result, ok bool) {
+	if e.magnet.StickRoot(pole) {
+		r := Result{
+			CombinedType: e.combinedType,
+			Image:        e.image,
+			Inverse:      true, // I drew shrimp pictures backwards...
+		}
+		return r, true
+	}
+
+	return Result{}, false
+}
+
+type tnt struct {
 	image  *ebiten.Image
 	magnet *magnet.BarMagnet
 	opt    *ebiten.DrawImageOptions
 }
 
-func newLeftArm() *leftArm {
-	img := asset.ImgRobotPart(asset.RobotPartLeftArm)
+func newTNT() robotPart {
+	img := asset.ImgRobotPart(asset.RobotPartTNT)
 	w, h := img.Size()
 
-	la := leftArm{
-		image:  img,
-		magnet: magnet.NewBarMagnet(float64(w), float64(h), magnet.PoleTypeN, magnet.PoleTypeS),
-		opt:    &ebiten.DrawImageOptions{},
+	t := tnt{
+		image: img,
+		magnet: magnet.NewBarMagnet(
+			float64(w),
+			float64(h),
+			magnet.PoleTypeN,
+			magnet.PoleTypeNone,
+			randLoc(),
+			randVelocity(),
+			randVelocity(),
+		),
+		opt: &ebiten.DrawImageOptions{},
 	}
 
-	return &la
+	return &t
 }
 
-func (la *leftArm) Update(poles []magnet.Pole) {
-	la.magnet.Update(poles)
+func (t *tnt) Update(poles []magnet.Pole) {
+	t.magnet.Update(poles)
 }
 
-func (la *leftArm) Draw(screen *ebiten.Image) {
-	gm := la.magnet.GeoM()
-	la.opt.GeoM = gm
-	screen.DrawImage(la.image, la.opt)
-
-	x1, y1, x2, y2, c := la.magnet.RootVDebug()
-	ebitenutil.DrawLine(screen, x1, y1, x2, y2, c)
-	x1, y1, x2, y2, c = la.magnet.TipVDebug()
-	ebitenutil.DrawLine(screen, x1, y1, x2, y2, c)
+func (t *tnt) Draw(screen *ebiten.Image) {
+	gm := t.magnet.GeoM()
+	t.opt.GeoM = gm
+	screen.DrawImage(t.image, t.opt)
 }
 
-func (la *leftArm) Combine(pole magnet.Pole) (result Result, ok bool) {
-	if la.magnet.StickRoot(pole) {
+func (t *tnt) Combine(pole magnet.Pole) (result Result, ok bool) {
+	if t.magnet.StickRoot(pole) {
 		r := Result{
-			CombinedType: combine.CombinedTypeCorrectArm,
-			Image:        la.image,
+			CombinedType: combine.CombinedTypeTNT,
+			Image:        t.image,
 			Inverse:      false,
-		}
-		return r, true
-	}
-	if la.magnet.StickTip(pole) {
-		r := Result{
-			CombinedType: combine.CombinedTypeInverseArm,
-			Image:        la.image,
-			Inverse:      true,
 		}
 		return r, true
 	}

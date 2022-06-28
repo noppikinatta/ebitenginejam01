@@ -11,16 +11,23 @@ const (
 )
 
 type launcher struct {
-	Parts   []updateCombiner
-	counter int
-	firsts  []func() updateCombiner
-	rnd     *rand.Rand
+	Parts         []robotPart
+	counter       int
+	notRndCounter int
+	news          []func() robotPart
+	rnd           *rand.Rand
 }
 
 func newLauncher() *launcher {
 	l := launcher{
-		firsts: []func() updateCombiner{
-			func() updateCombiner { return newLeftArm() },
+		news: []func() robotPart{
+			newLeftArm,
+			newRightArm,
+			newLeftLeg,
+			newRightLeg,
+			newEbitenS,
+			newEbitenN,
+			newTNT,
 		},
 		rnd: rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
@@ -44,16 +51,18 @@ func (l *launcher) launch() {
 	l.Parts = append(l.Parts, p)
 }
 
-func (l *launcher) randomPart() updateCombiner {
-	if len(l.Parts) < len(l.firsts) {
+func (l *launcher) randomPart() robotPart {
+	if l.notRndCounter < len(l.news) {
 		// first not random
-		return l.firsts[len(l.Parts)]()
+		p := l.news[l.notRndCounter]()
+		l.notRndCounter++
+		return p
 	}
-	i := l.rnd.Intn(len(l.firsts))
-	return l.firsts[i]()
+	i := l.rnd.Intn(len(l.news))
+	return l.news[i]()
 }
 
-func (l *launcher) Remove(p updateCombiner) {
+func (l *launcher) Remove(p robotPart) {
 	for i := range l.Parts {
 		if l.Parts[i] != p {
 			continue
@@ -62,4 +71,9 @@ func (l *launcher) Remove(p updateCombiner) {
 		l.Parts = append(l.Parts[:i], l.Parts[i+1:]...)
 		break
 	}
+}
+
+func (l *launcher) Reset() {
+	l.notRndCounter = 0
+	l.Parts = make([]robotPart, 0)
 }

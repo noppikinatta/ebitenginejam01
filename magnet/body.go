@@ -31,6 +31,13 @@ func NewBody(width, height, armPoleYOffset, legPoleXOffset float64) *Body {
 	return &b
 }
 
+func (b *Body) Loc() (x, y float64) {
+	gm := b.GeoM()
+	tx := gm.Element(0, 2)
+	ty := gm.Element(1, 2)
+	return tx, ty
+}
+
 func (b *Body) Pole(pt part.PartType) Pole {
 	return b.parts[pt]
 }
@@ -57,18 +64,22 @@ func (b *Body) updatePoleLocs() {
 	p := b.parts[part.PartTypeLeftArm]
 	p.X = left
 	p.Y = top + b.armPoleYOffset
+	b.parts[part.PartTypeLeftArm] = p
 
 	p = b.parts[part.PartTypeRightArm]
 	p.X = right
 	p.Y = top + b.armPoleYOffset
+	b.parts[part.PartTypeRightArm] = p
 
 	p = b.parts[part.PartTypeLeftLeg]
 	p.X = left + b.legPoleXOffset
 	p.Y = bottom
+	b.parts[part.PartTypeLeftLeg] = p
 
 	p = b.parts[part.PartTypeRightLeg]
 	p.X = right - b.legPoleXOffset
 	p.Y = bottom
+	b.parts[part.PartTypeRightLeg] = p
 }
 
 func (b *Body) GeoM() ebiten.GeoM {
