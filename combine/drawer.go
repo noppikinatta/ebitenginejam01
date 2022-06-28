@@ -12,6 +12,7 @@ type Drawer struct {
 	image      *ebiten.Image
 	opt        *ebiten.DrawImageOptions
 	parts      map[part.PartType]*DrawerPart
+	optGeoms   map[part.PartType]ebiten.GeoM
 	armYOffset float64
 	legXOffset float64
 }
@@ -23,6 +24,7 @@ func NewDrawer(armYOffset, legXOffset float64) *Drawer {
 		image:      img,
 		opt:        &ebiten.DrawImageOptions{},
 		parts:      make(map[part.PartType]*DrawerPart),
+		optGeoms:   make(map[part.PartType]ebiten.GeoM),
 		armYOffset: armYOffset,
 		legXOffset: legXOffset,
 	}
@@ -31,10 +33,15 @@ func NewDrawer(armYOffset, legXOffset float64) *Drawer {
 
 func (d *Drawer) Draw(screen *ebiten.Image, gm ebiten.GeoM) {
 	d.opt.GeoM = gm
-
 	screen.DrawImage(d.image, d.opt)
 
-	for _, p := range d.parts {
+	for t, p := range d.parts {
+		gm := d.opt.GeoM
+		optGeoM, ok := d.optGeoms[t]
+		if ok {
+			optGeoM.Concat(gm)
+			gm = optGeoM
+		}
 		p.Draw(screen, gm)
 	}
 }
@@ -80,6 +87,15 @@ func (d *Drawer) SetPart(p part.PartType, image *ebiten.Image, inverse bool) {
 	d.parts[p] = NewDrawPart(image, gm)
 }
 
+func (d *Drawer) SetOptGeoM(pt part.PartType, gm ebiten.GeoM) {
+	d.optGeoms[pt] = gm
+}
+
+func (d *Drawer) Reset() {
+	d.parts = make(map[part.PartType]*DrawerPart)
+	d.optGeoms = make(map[part.PartType]ebiten.GeoM)
+}
+
 type DrawerPart struct {
 	image *ebiten.Image
 	gm    ebiten.GeoM
@@ -95,9 +111,9 @@ func NewDrawPart(image *ebiten.Image, gm ebiten.GeoM) *DrawerPart {
 	return &p
 }
 
-func (p *DrawerPart) Draw(screen *ebiten.Image, bodyGM ebiten.GeoM) {
+func (p *DrawerPart) Draw(screen *ebiten.Image, optGeoM ebiten.GeoM) {
 	gm := p.gm
-	gm.Concat(bodyGM)
+	gm.Concat(optGeoM)
 	p.opt.GeoM = gm
 
 	screen.DrawImage(p.image, p.opt)

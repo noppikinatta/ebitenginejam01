@@ -34,13 +34,12 @@ func AllScenes() *Container {
 	cr := combine.NewCombinedResult()
 
 	t := title.NewScene()
-	p := prologue.NewScene() // TODO: add constructors
+	p := prologue.NewScene()
 	g := gameplay.NewScene(cr)
-	r := &result.Scene{}
+	r := result.NewScene(cr)
 
 	c := NewContainer([]Scene{t, p, g, r})
 
-	// TODO: return err
 	_ = c.AddTransition(r, p)
 
 	return c

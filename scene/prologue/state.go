@@ -7,7 +7,7 @@ const (
 	stateMsgWaitClick
 	stateMsgFadeOut
 	stateLaunchFadeIn
-	stateLaunchWaitClick
+	stateLaunching
 	stateLaunchFadeOut
 )
 

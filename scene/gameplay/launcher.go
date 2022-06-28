@@ -27,7 +27,7 @@ func newLauncher() *launcher {
 			newRightLeg,
 			newEbitenS,
 			newEbitenN,
-			newTNT,
+			//newTNT,
 		},
 		rnd: rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
@@ -47,7 +47,6 @@ func (l *launcher) launch() {
 	}
 
 	p := l.randomPart()
-	// TODO: set first place
 	l.Parts = append(l.Parts, p)
 }
 

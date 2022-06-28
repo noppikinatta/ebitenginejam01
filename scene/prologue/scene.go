@@ -17,7 +17,6 @@ package prologue
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/noppikinatta/ebitenginejam01/animation"
-	"github.com/noppikinatta/ebitenginejam01/asset"
 	"github.com/noppikinatta/ebitenginejam01/input"
 )
 
@@ -27,9 +26,9 @@ type Scene struct {
 	fadeOut       *animation.FadeOut
 	ea            *enemyAppears
 	msg           *messageScreen
+	launch        *launching
 	msgWaitFrames int
 	msgWaitCount  int
-	// TODO: add launching screen
 }
 
 func NewScene() *Scene {
@@ -38,6 +37,7 @@ func NewScene() *Scene {
 		fadeOut:       animation.NewFadeOut(15),
 		ea:            newEnemyAppears(),
 		msg:           newMessageScreen(),
+		launch:        newLaunching(),
 		msgWaitFrames: 45,
 	}
 	s.Reset()
@@ -59,6 +59,10 @@ func (s *Scene) Update() error {
 		if s.msgWaitCount < s.msgWaitFrames {
 			s.msgWaitCount++
 		}
+	}
+
+	if s.state.Launching() {
+		s.launch.Update()
 	}
 
 	return nil
@@ -85,10 +89,10 @@ func (s *Scene) updateState() {
 		}
 	case stateLaunchFadeIn:
 		if s.fadeIn.End() {
-			s.state = stateLaunchWaitClick
+			s.state = stateLaunching
 		}
-	case stateLaunchWaitClick:
-		if input.LeftMousedownOrTouched() {
+	case stateLaunching:
+		if s.launch.End() || input.LeftMousedownOrTouched() {
 			s.state = stateLaunchFadeOut
 		}
 	}
@@ -107,8 +111,7 @@ func (s *Scene) Draw(screen *ebiten.Image) {
 	}
 
 	if s.state.Launching() {
-		//TODO: impl launching scene
-		screen.DrawImage(asset.ImgPrologueBg.MustImage(), nil)
+		s.launch.Draw(screen)
 	}
 
 	if s.state.FadingIn() {
@@ -131,4 +134,5 @@ func (s *Scene) Reset() {
 	s.fadeIn.Reset()
 	s.fadeOut.Reset()
 	s.msg.Reset()
+	s.launch.Reset()
 }

@@ -26,7 +26,7 @@ type AttackType int
 
 const (
 	AttackTypeFall AttackType = iota
-	AttackTypeTNT
+	// AttackTypeTNT
 	AttackTypeSuccess
 )
 
@@ -104,16 +104,20 @@ func (r *CombinedResult) Attack() AttackType {
 	if r.LeftArm() == CombinedTypeCorrectArm {
 		return AttackTypeSuccess
 	}
-	if r.LeftArm() == CombinedTypeTNT {
-		return AttackTypeTNT
+	if r.RightArm() == CombinedTypeCorrectArm {
+		return AttackTypeSuccess
 	}
-	if r.RightArm() == CombinedTypeTNT {
-		return AttackTypeTNT
-	}
+	// if r.LeftArm() == CombinedTypeTNT {
+	// 	return AttackTypeTNT
+	// }
+	// if r.RightArm() == CombinedTypeTNT {
+	// 	return AttackTypeTNT
+	// }
 
 	return AttackTypeFall
 }
 
 func (r *CombinedResult) Reset() {
 	r.types = make(map[part.PartType]CombinedType)
+	r.Drawer.Reset()
 }
