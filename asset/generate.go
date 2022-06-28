@@ -16,6 +16,4 @@ package asset
 
 //go:generate go run img/genimg.go
 
-// TODO: add sound generating code
-
 //go:generate gofmt -s -w .
