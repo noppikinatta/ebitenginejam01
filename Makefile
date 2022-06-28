@@ -1,4 +1,4 @@
-.PHONY: gen run test test-cov
+.PHONY: gen run test test-cov build
 
 gen:
 	go generate ./...
@@ -11,3 +11,6 @@ test:
 
 test-cov:
 	go test -cover -coverprofile=cover.out -v ./... && go tool cover -html=cover.out
+
+build:
+	GOOS=js GOARCH=wasm go build -o=release/game.wasm app/main.go
