@@ -17,11 +17,12 @@ func init() {
 }
 
 type launching struct {
-	parts []*ebiten.Image
-	locs  []magnet.Location
-	vecs  []magnet.Velocity
-	bg    *ebiten.Image
-	lab   *ebiten.Image
+	parts       []*ebiten.Image
+	locs        []magnet.Location
+	vecs        []magnet.Velocity
+	bg          *ebiten.Image
+	lab         *ebiten.Image
+	soundPlayed bool
 }
 
 func newLaunching() *launching {
@@ -43,6 +44,10 @@ func newLaunching() *launching {
 }
 
 func (l *launching) Update() {
+	if !l.soundPlayed {
+		asset.PlaySound(asset.SEFly)
+		l.soundPlayed = true
+	}
 	for i := range l.locs {
 		l.locs[i] = l.locs[i].Move(l.vecs[i])
 	}
@@ -90,4 +95,5 @@ func (l *launching) Reset() {
 			Y: -5 - 5*rndForLaunching.Float64(),
 		}
 	}
+	l.soundPlayed = false
 }

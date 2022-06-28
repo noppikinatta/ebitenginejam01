@@ -17,14 +17,16 @@ package title
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/noppikinatta/ebitenginejam01/animation"
+	"github.com/noppikinatta/ebitenginejam01/asset"
 	"github.com/noppikinatta/ebitenginejam01/input"
 )
 
 type Scene struct {
-	state   state
-	fadeIn  *animation.FadeIn
-	fadeOut *animation.FadeOut
-	image   *image
+	state      state
+	fadeIn     *animation.FadeIn
+	fadeOut    *animation.FadeOut
+	image      *image
+	bgm1Played bool
 }
 
 func NewScene() *Scene {
@@ -38,6 +40,10 @@ func NewScene() *Scene {
 }
 
 func (s *Scene) Update() error {
+	if !s.bgm1Played {
+		asset.PlaySound(asset.BGM1)
+		s.bgm1Played = true
+	}
 	s.updateState()
 
 	switch s.state {
@@ -45,6 +51,9 @@ func (s *Scene) Update() error {
 		s.fadeIn.Update()
 	case stateFadeOut:
 		s.fadeOut.Update()
+		if s.fadeOut.End() {
+			asset.StopSound(asset.BGM1)
+		}
 	}
 
 	s.image.Update()
@@ -84,4 +93,5 @@ func (s *Scene) Reset() {
 	s.fadeIn.Reset()
 	s.fadeOut.Reset()
 	s.image.Reset()
+	s.bgm1Played = false
 }

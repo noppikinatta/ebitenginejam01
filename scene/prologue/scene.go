@@ -17,6 +17,7 @@ package prologue
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/noppikinatta/ebitenginejam01/animation"
+	"github.com/noppikinatta/ebitenginejam01/asset"
 	"github.com/noppikinatta/ebitenginejam01/input"
 )
 
@@ -29,6 +30,7 @@ type Scene struct {
 	launch        *launching
 	msgWaitFrames int
 	msgWaitCount  int
+	bgm2Played    bool
 }
 
 func NewScene() *Scene {
@@ -45,6 +47,11 @@ func NewScene() *Scene {
 }
 
 func (s *Scene) Update() error {
+	if s.bgm2Played == false {
+		asset.PlaySound(asset.BGM2)
+		s.bgm2Played = true
+	}
+
 	s.updateState()
 
 	if s.state.FadingIn() {
@@ -135,4 +142,5 @@ func (s *Scene) Reset() {
 	s.fadeOut.Reset()
 	s.msg.Reset()
 	s.launch.Reset()
+	s.bgm2Played = false
 }

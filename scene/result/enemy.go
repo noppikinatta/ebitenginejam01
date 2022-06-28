@@ -43,6 +43,7 @@ func (e *enemy) Update() {
 }
 
 func (e *enemy) Attack() {
+	asset.PlaySound(asset.SEFire)
 	e.attackCount = 150
 	e.attackEnd = false
 }

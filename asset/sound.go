@@ -14,19 +14,145 @@
 
 package asset
 
-// BGM
+import (
+	"bytes"
+	_ "embed"
+	"errors"
+	"io"
+	"log"
 
-// - main intro
-// - main loop
-// - result
+	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
+	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
+	"github.com/hajimehoshi/ebiten/v2/audio/wav"
+)
 
-// SE
+//go:embed sound/bgm1.wav
+var bgm1 []byte
 
-// Gameplay
-// - combine
+//go:embed sound/bgm2.wav
+var bgm2 []byte
 
-// Result
-// - randing
-// - explode
-// - shoot
-// - fire
+//go:embed sound/bgm3.wav
+var bgm3 []byte
+
+//go:embed sound/atari_boom.wav
+var seFire []byte
+
+//go:embed sound/atari_boom4.wav
+var seFly []byte
+
+//go:embed sound/explosion1.mp3
+var seExplosion []byte
+
+//go:embed sound/qubodupPunch05.ogg
+var seCombined []byte
+
+const sampleRate int = 48000
+
+var context *audio.Context
+
+func init() {
+	context = audio.NewContext(sampleRate)
+	soundCache = map[Sound]*audio.Player{}
+}
+
+type Sound int
+
+const (
+	BGM1 Sound = iota
+	BGM2
+	BGM3
+	SEFire
+	SEFly
+	SEExplosion
+	SECombined
+)
+
+func LoadSounds() error {
+	ss := []struct {
+		Resource []byte
+		Sound    Sound
+		FileType fileType
+	}{
+		{seFire, SEFire, fileTypeWav},
+		{seFly, SEFly, fileTypeWav},
+		{seExplosion, SEExplosion, fileTypeMp3},
+		{seCombined, SECombined, fileTypeOgg},
+		{bgm1, BGM1, fileTypeWav},
+		{bgm2, BGM2, fileTypeWav},
+		{bgm3, BGM3, fileTypeWav},
+	}
+
+	for _, s := range ss {
+		err := load(s.Resource, s.Sound, s.FileType)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+type fileType int
+
+const (
+	fileTypeWav fileType = iota
+	fileTypeMp3
+	fileTypeOgg
+)
+
+func load(resource []byte, sound Sound, ftype fileType) error {
+	var s io.ReadSeeker
+	var err error
+
+	switch ftype {
+	case fileTypeWav:
+		s, err = wav.DecodeWithSampleRate(sampleRate, bytes.NewReader(resource))
+		if err != nil {
+			return err
+		}
+	case fileTypeMp3:
+		s, err = mp3.DecodeWithSampleRate(sampleRate, bytes.NewReader(resource))
+		if err != nil {
+			return err
+		}
+	case fileTypeOgg:
+		s, err = vorbis.DecodeWithSampleRate(sampleRate, bytes.NewReader(resource))
+		if err != nil {
+			return err
+		}
+	default:
+		return errors.New("not supported filetype")
+	}
+
+	// BGM2 loops
+	if sound == BGM2 {
+		s = audio.NewInfiniteLoop(s, int64(len(resource)))
+	}
+
+	p, err := context.NewPlayer(s)
+	if err != nil {
+		return err
+	}
+	p.SetVolume(0.8) // not enough time to adjust each sounds
+	soundCache[sound] = p
+
+	return nil
+}
+
+var soundCache map[Sound]*audio.Player
+
+func PlaySound(s Sound) {
+	p := soundCache[s]
+	err := p.Rewind()
+	if err != nil {
+		log.Println(err)
+	}
+	p.Play()
+}
+
+func StopSound(s Sound) {
+	p := soundCache[s]
+	p.Pause()
+}

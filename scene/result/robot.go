@@ -30,10 +30,16 @@ func (r *randing) Update() {
 	switch r.result.Randing() {
 	case combine.RandingTypeSuccess:
 		if r.y > 180 {
+			if !r.end {
+				asset.PlaySound(asset.SECombined)
+			}
 			r.y = 180
 			r.end = true
 		}
 	case combine.RandingTypeFailure:
+		if r.y > 180 && r.y < 184 {
+			asset.PlaySound(asset.SEFire)
+		}
 		if r.y > 180 {
 			if r.result.LeftLeg() != combine.CombinedTypeCorrectLeg {
 				t := 180 - r.y
@@ -101,12 +107,26 @@ func (a *attack) SetLoc(x, y float64) {
 func (a *attack) Update() {
 	if a.waitCounter < 60 {
 		a.waitCounter++
+		switch a.result.RightArm() {
+		case combine.CombinedTypeCorrectArm:
+			bodyW, _ := asset.ImgRobotPart(asset.RobotPartBody).Size()
+
+			gm := ebiten.GeoM{}
+			gm.Translate(-float64(bodyW), -armPoleYOffset)
+			gm.Rotate(-math.Pi * float64(a.waitCounter) / 60)
+			gm.Translate(float64(bodyW), armPoleYOffset)
+			a.result.Drawer.SetOptGeoM(part.PartTypeRightArm, gm)
+		}
 		return
 	}
 
 	if a.counter > 60 {
 		a.end = true
 		return
+	}
+
+	if a.counter == 0 {
+		asset.PlaySound(asset.SEFly)
 	}
 
 	a.counter++
@@ -129,14 +149,11 @@ func (a *attack) Update() {
 	switch a.result.RightArm() {
 	case combine.CombinedTypeCorrectArm:
 		bodyW, _ := asset.ImgRobotPart(asset.RobotPartBody).Size()
-		// depends on all parts have same size
-		_, partH := asset.ImgRobotPart(asset.RobotPartRightArm).Size()
 
 		gm := ebiten.GeoM{}
-		gm.Translate(-float64(bodyW), float64(partH)/2-armPoleYOffset)
+		gm.Translate(-float64(bodyW), -armPoleYOffset)
 		gm.Rotate(math.Pi)
-		// I don't know why but adding half of partH/2 works fine
-		gm.Translate(float64(bodyW), armPoleYOffset+float64(partH)/2)
+		gm.Translate(float64(bodyW), armPoleYOffset)
 		gm.Translate(-float64(a.counter)*6, 0)
 		a.result.Drawer.SetOptGeoM(part.PartTypeRightArm, gm)
 	default:

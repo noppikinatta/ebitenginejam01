@@ -62,6 +62,7 @@ func (i Img) createImage() (*ebiten.Image, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer imgFile.Close()
 
 	baseImg, _, err := image.Decode(imgFile)
 	if err != nil {

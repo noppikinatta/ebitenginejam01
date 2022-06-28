@@ -16,11 +16,13 @@ package ebitenginejam01
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/noppikinatta/ebitenginejam01/asset"
 	"github.com/noppikinatta/ebitenginejam01/scene"
 )
 
 type Game struct {
-	scenes *scene.Container
+	scenes      *scene.Container
+	soundLoaded bool
 }
 
 func NewGame(scenes *scene.Container) *Game {
@@ -31,6 +33,13 @@ func NewGame(scenes *scene.Container) *Game {
 }
 
 func (g *Game) Update() error {
+	if !g.soundLoaded {
+		err := asset.LoadSounds()
+		if err != nil {
+			return err
+		}
+		g.soundLoaded = true
+	}
 	return g.scenes.Current().Update()
 }
 

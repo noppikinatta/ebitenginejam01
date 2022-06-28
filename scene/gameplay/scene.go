@@ -128,6 +128,7 @@ func (s *Scene) updateCombine() {
 				continue
 			}
 
+			asset.PlaySound(asset.SECombined)
 			combinedParts = append(combinedParts, p)
 			s.result.Set(k, r.CombinedType)
 			s.result.Drawer.SetPart(k, r.Image, r.Inverse)

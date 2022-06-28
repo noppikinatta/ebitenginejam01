@@ -36,17 +36,18 @@ func init() {
 }
 
 type Scene struct {
-	state     state
-	fadeIn    *animation.FadeIn
-	fadeOut   *animation.FadeOut
-	bg        *ebiten.Image
-	result    *combine.CombinedResult
-	randing   *randing
-	attack    *attack
-	enemy     *enemy
-	explRobot *explosion
-	explEnemy *explosion
-	showR     *showResult
+	state       state
+	fadeIn      *animation.FadeIn
+	fadeOut     *animation.FadeOut
+	bg          *ebiten.Image
+	result      *combine.CombinedResult
+	randing     *randing
+	attack      *attack
+	enemy       *enemy
+	explRobot   *explosion
+	explEnemy   *explosion
+	showR       *showResult
+	bgm2Stopped bool
 }
 
 func NewScene(result *combine.CombinedResult) *Scene {
@@ -67,6 +68,11 @@ func NewScene(result *combine.CombinedResult) *Scene {
 }
 
 func (s *Scene) Update() error {
+	if !s.bgm2Stopped {
+		asset.StopSound(asset.BGM2)
+		s.bgm2Stopped = true
+	}
+
 	s.updateState()
 
 	if s.state == stateFadeIn {
@@ -99,7 +105,7 @@ func (s *Scene) Update() error {
 
 	s.enemy.Update()
 
-	return nil 
+	return nil
 }
 
 func (s *Scene) updateState() {
@@ -132,20 +138,22 @@ func (s *Scene) updateState() {
 			s.state = stateRobotExplode
 		}
 	case stateEnemyExplode:
-		if s.explEnemy.End() {
+		if s.explEnemy.End() || input.LeftMousedownOrTouched() {
 			img := ebiten.NewImage(s.bg.Size())
 			s.Draw(img)
 			s.showR.SetSS(img)
 			s.showR.Victory()
 			s.state = stateShowResult
+			asset.PlaySound(asset.BGM3)
 		}
 	case stateRobotExplode:
-		if s.explRobot.End() {
+		if s.explRobot.End() || input.LeftMousedownOrTouched() {
 			img := ebiten.NewImage(s.bg.Size())
 			s.Draw(img)
 			s.showR.SetSS(img)
 			s.showR.Failed()
 			s.state = stateShowResult
+			asset.PlaySound(asset.BGM3)
 		}
 	case stateShowResult:
 		if input.LeftMousedownOrTouched() {
@@ -203,4 +211,5 @@ func (s *Scene) Reset() {
 	s.explRobot.Reset()
 	s.explEnemy.Reset()
 	s.showR.Reset()
+	s.bgm2Stopped = false
 }

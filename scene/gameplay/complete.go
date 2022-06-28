@@ -2,6 +2,7 @@ package gameplay
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/noppikinatta/ebitenginejam01/asset"
 	"github.com/noppikinatta/ebitenginejam01/combine"
 )
 
@@ -43,6 +44,7 @@ func (c *complete) Update() {
 		if c.y > (c.h + 100) {
 			c.state = completeStateGo
 			c.y = 400
+			asset.PlaySound(asset.SEFly)
 		}
 	case completeStateGo:
 		c.y -= 20

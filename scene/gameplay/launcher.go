@@ -23,10 +23,10 @@ func newLauncher() *launcher {
 		news: []func() robotPart{
 			newLeftArm,
 			newRightArm,
-			newLeftLeg,
-			newRightLeg,
 			newEbitenS,
+			newLeftLeg,
 			newEbitenN,
+			newRightLeg,
 			//newTNT,
 		},
 		rnd: rand.New(rand.NewSource(time.Now().UnixNano())),

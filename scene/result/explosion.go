@@ -21,12 +21,16 @@ func newExplosion(x, y float64) *explosion {
 		y:     y,
 		max:   200,
 	}
+	e.Reset()
 	return &e
 }
 
 func (e *explosion) Update() {
 	if e.End() {
 		return
+	}
+	if e.count == 0 {
+		asset.PlaySound(asset.SEExplosion)
 	}
 	e.count++
 }
