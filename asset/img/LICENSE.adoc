@@ -1,0 +1,5 @@
+= LICENSE
+
+All png images are made by noppikinatta with link:https://www.getpaint.net/[Paint.NET].
+
+They are licensed under the CC-BY 3.0.

@@ -1,2 +1,7 @@
 = A game for Ebitengine Game Jam
 
+You can play on the link:https://noppikinatta.itch.io/magnetic-robot-ebitenger[itch.io].
+
+== LICENSES
+
+Code is licensed under the Apache 2.0 License. Assets are licensed as described in asset/img/LICENSE.adoc and asset/sound/LICENSE.adoc.

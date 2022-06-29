@@ -1,6 +1,6 @@
-# LICENSE
+= LICENSE
 
-## explosion1.mp3
+== explosion1.mp3
 
 * https://opengameart.org/content/wgs-sound-fx-explosion-1
 
@@ -9,7 +9,7 @@ CC-BY 3.0
 .Author: 
 Retimer https://opengameart.org/users/retimer
 
-## atari_boom.wav atari_boom4.wav
+== atari_boom.wav atari_boom4.wav
 
 * https://opengameart.org/content/atari-booms
 
@@ -18,8 +18,14 @@ CC-BY 3.0
 .Author: 
 dklon https://opengameart.org/users/dklon
 
-## qubodupPunch05.ogg
+== qubodupPunch05.ogg
 
 * https://opengameart.org/content/punch
 
 CC0
+
+== bgm1.wav bgm2.wav bgm3.wav
+
+Composed by noppikinatta with link:https://lmms.io/[LMMS].
+
+CC-BY 3.0
