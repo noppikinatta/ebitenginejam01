@@ -74,18 +74,19 @@ func LoadSounds() error {
 		Resource []byte
 		Sound    Sound
 		FileType fileType
+		Volume   float64
 	}{
-		{seFire, SEFire, fileTypeWav},
-		{seFly, SEFly, fileTypeWav},
-		{seExplosion, SEExplosion, fileTypeMp3},
-		{seCombined, SECombined, fileTypeOgg},
-		{bgm1, BGM1, fileTypeWav},
-		{bgm2, BGM2, fileTypeWav},
-		{bgm3, BGM3, fileTypeWav},
+		{seFire, SEFire, fileTypeWav, 0.8},
+		{seFly, SEFly, fileTypeWav, 0.8},
+		{seExplosion, SEExplosion, fileTypeMp3, 0.8},
+		{seCombined, SECombined, fileTypeOgg, 0.8},
+		{bgm1, BGM1, fileTypeWav, 0.08},
+		{bgm2, BGM2, fileTypeWav, 0.4},
+		{bgm3, BGM3, fileTypeWav, 0.08},
 	}
 
 	for _, s := range ss {
-		err := load(s.Resource, s.Sound, s.FileType)
+		err := load(s.Resource, s.Sound, s.FileType, s.Volume)
 		if err != nil {
 			return err
 		}
@@ -102,7 +103,7 @@ const (
 	fileTypeOgg
 )
 
-func load(resource []byte, sound Sound, ftype fileType) error {
+func load(resource []byte, sound Sound, ftype fileType, vol float64) error {
 	var s io.ReadSeeker
 	var err error
 
@@ -135,7 +136,7 @@ func load(resource []byte, sound Sound, ftype fileType) error {
 	if err != nil {
 		return err
 	}
-	p.SetVolume(0.8) // not enough time to adjust each sounds
+	p.SetVolume(vol)
 	soundCache[sound] = p
 
 	return nil
